@@ -1,0 +1,78 @@
+{% extends "sidebar.html" %}
+{% load static %}
+
+{% block dashboard-content %}
+<style>
+    .modal-content {
+        background-color: ivory;
+    }
+</style>
+
+{% if messages %}
+<div class="alert alert-primary" role="alert" id="messages-container"
+    style="position: absolute;z-index: 1;width: 100%;">
+    {% for message in messages %}
+    {{ message }}
+    {% endfor %}
+</div>
+{% endif %}
+
+<script>
+    // Function to hide the messages container after 3 seconds
+    setTimeout(function () {
+        var messagesContainer = document.getElementById('messages-container');
+        if (messagesContainer) {
+            messagesContainer.style.display = 'none';
+        }
+    }, 3000); // 3000 milliseconds = 3 seconds
+</script>
+<h1>Settings</h1>
+<main class="main bd-grid" id="product-container">
+    <div class="container mt-2">
+        <div class="form-group">
+            <h2>Select Which Items to Reset:</h2>
+            <select class="form-control border border-dark m-3" id="tableSelect">
+                {% for table in table_names %}
+                <option value="{{ table }}">{{ table }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button class="btn btn-danger" data-bs-toggle="modal" id="btnclick" data-bs-target="#deleteModal">Delete</button>
+    </div>
+</main>
+
+<!-- Modal -->
+<div class="modal" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Reset <span id="selectedTable"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'truncate_table' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    Are you sure you want to reset this table?
+                </div>
+                <input type="hidden"  id="table_name_input" name="table_name">
+                <div class="modal-footer">
+                    <button class="btn btn-danger" type="submit">Reset</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    const btnclick = document.getElementById('btnclick')
+    btnclick.addEventListener('click',function() {
+        let tableSelect = document.getElementById("tableSelect").value;
+        let selectedTable = document.getElementById("selectedTable");
+        let tableInput = document.getElementById("table_name_input");
+        selectedTable.innerHTML = tableSelect;
+        tableInput.value = tableSelect; 
+    });
+</script>
+
+
+{% endblock dashboard-content %}

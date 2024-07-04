@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block body %}
+<container class="productcontainer">
+  {% if messages %}
+  <div class="alert alert-primary" role="alert" id="messages-container">
+    {% for message in messages %}
+    {{ message }}
+    {% endfor %}
+  </div>
+  {% endif %}
+  
+  <script>
+    // Function to hide the messages container after 3 seconds
+    setTimeout(function() {
+      var messagesContainer = document.getElementById('messages-container');
+      if (messagesContainer) {
+        messagesContainer.style.display = 'none';
+      }
+    }, 3000); // 3000 milliseconds = 3 seconds
+  </script>
+  
+  <h1>Order</h1>
+  <main class="main bd-grid" id="product-container">
+    <div class="container mt-5">
+      <div class="table-responsive">
+        {% if orders %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Order Status</th>
+              <th>Order Amount</th>
+              <th>Order date</th>
+              <th>view order</th>
+              <th>cancel order</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders %}
+           
+            <tr>
+              <td>
+                <!-- <span class="font-weight-bold cartprodname">{{ order.order_number }}</span> -->
+                <span class="font-weight-bold cartprodname">{{ order.id }}</span>
+              </td>
+              <td>
+                <span class="font-weight-bold cartprodname">{{ order.order_status }}</span>
+              </td>
+              <td>
+                <span class="font-weight-bold">{{ order.order_total }}</span>
+              </td>
+              <td>
+                <span class="font-weight-bold">{{ order.created_at }}</span>
+              </td>
+              <td>
+                <a href="{% url 'orderdetail' order.id %}"><span class="font-weight-bold btn btn-success"><i class="bi bi-eye-fill"></i></span></a>
+              </td>
+              <td>
+                <a href="{% url 'cancelorder' order.id %}"><span class="font-weight-bold btn btn-danger">cancel order</span></a>
+                
+              </td>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div colspan="6" class="align-self-center">
+          <h3>you don't have any order</h3>
+          <img src="{% static 'img/empty-box.jpeg' %}" alt="Empty Cart" style="width: 100%;" />
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </main>
+</container>
+{% endblock %}

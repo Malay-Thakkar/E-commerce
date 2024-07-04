@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block body %}
+<container class="productcontainer">
+  {% if messages %}
+  <div class="alert alert-primary" role="alert" id="messages-container">
+    {% for message in messages %}
+    {{ message }}
+    {% endfor %}
+  </div>
+  {% endif %}
+  
+  <script>
+    // Function to hide the messages container after 3 seconds
+    setTimeout(function() {
+      var messagesContainer = document.getElementById('messages-container');
+      if (messagesContainer) {
+        messagesContainer.style.display = 'none';
+      }
+    }, 3000); // 3000 milliseconds = 3 seconds
+  </script>
+  
+  <h1>Cart</h1>
+  <main class="main bd-grid" id="product-container">
+    <div class="container mt-5">
+      <div class="table-responsive">
+        {% if cart_products %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th>Delete Item</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for product in cart_products %}
+           
+            <tr>
+              <td>
+                <img class="card-img" src="../media/{{ product.img }}" alt="Product Image" />
+              </td>
+              <td>
+                <span class="font-weight-bold cartprodname">{{ product.name }}</span>
+              </td>
+              <td>
+                <span class="font-weight-bold">{{ product.price }}</span>
+              </td>
+              <td>
+                <div class="quantity-selector" style="width: 150px;">
+                  <button class="btn btn-secondary quantity-btn bg-danger decrement-btn update-cart"
+                    data-index="{{ product.product_id }}">-</button>
+                  {% for key, value in cart_quantity.items %}
+                  {% if key == product.product_id|stringformat:'s' %}
+                  <input type="number" class="form-control quantity-input" value="{{ value }}" min="1"
+                    style="width: 70px;" id="select{{ product.product_id }}" />
+                  {% endif %}
+                  {% endfor %}
+                  <button class="btn btn-secondary quantity-btn bg-success increment-btn update-cart"
+                    data-index="{{ product.product_id }}">+</button>
+                </div>
+              </td>
+
+              <td>
+                <button class="btn btn-danger delete-product" data-index="{{ product.product_id }}">Delete</button>
+              </td>
+              <td>
+                <span class="font-weight-bold" id="subtotal{{ product.product_id }}"></span>
+                <script>
+                  var product_qty = $('#select{{ product.product_id }}').val();
+                  var product_price = "{{ product.price }}";
+                  var subtotal = product_price * product_qty;
+                  $('#subtotal{{ product.product_id }}').text(subtotal);
+                </script>
+              </td>
+              
+            </tr>
+            {% endfor %}
+            <tr>
+              <th colspan="4"></th>
+              <th>Grand Total:</th>
+              <th>{{total}} </th>
+            </tr>
+            <tr>
+              <th colspan="4"></th>
+              <th>Grand Total with GST(18%):</th>
+              <th>{{gsttotal}} </th>
+            </tr>
+            <tr>
+              <th colspan="4"></th>
+              <th colspan="2" class="d-flex justify-content-center"><a href="{% url 'checkout' %}" class="btn btn-info">Checkout</a></th>
+              
+              
+            </tr>
+          </tbody>
+        </table>
+        {% else %}
+        <div colspan="6" class="align-self-center">
+          <h3>Your cart is Empty</h3>
+          <img src="{% static 'img/empty-cart.png' %}" alt="Empty Cart" style="width: 100%;" />
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </main>
+</container>
+
+<script>
+  //btn encryment quantity
+  document.addEventListener('DOMContentLoaded', function () {
+    var incrementBtns = document.querySelectorAll('.increment-btn')
+    var decrementBtns = document.querySelectorAll('.decrement-btn')
+
+    incrementBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var input = this.parentNode.querySelector('.quantity-input')
+        input.stepUp()
+      })
+    })
+
+    decrementBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var input = this.parentNode.querySelector('.quantity-input')
+        input.stepDown()
+      })
+    })
+  })
+
+  // update cart
+  $(document).on('click', '.update-cart', function (e) {
+    e.preventDefault()
+    var productid = $(this).data('index');
+    var product_qty = $('#select' + productid).val();
+    $.ajax({
+      type: 'POST',
+      url: "{% url 'cart_update' %}",
+      data: {
+        // product_id: 2, 
+        product_id: productid,
+        product_qty: product_qty,
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+        action: 'post'
+      },
+      success: function (json) {
+        // console.log(json);
+        location.reload();
+      },
+      error: function (xhr, errmsg, err) {
+        console.log(errmsg);
+      }
+    });
+  });
+
+  // delete product in cart
+  $(document).on('click', '.delete-product', function (e) {
+    e.preventDefault()
+    var productid = $(this).data('index');
+    var product_qty = $('#select' + productid).val();
+    $.ajax({
+      type: 'POST',
+      url: "{% url 'cart_delete' %}",
+      data: {
+        product_id: productid,
+        product_qty: product_qty,
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+        action: 'post'
+      },
+      success: function (json) {
+        location.reload();
+      },
+      error: function (xhr, errmsg, err) {
+        console.log(errmsg);
+      }
+    });
+  });
+</script>
+{% endblock %}

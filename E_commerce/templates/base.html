@@ -1,0 +1,130 @@
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PS-Thakkar</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'img/logo_e.png'%}">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'bootstrap-5/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static '/fontawesome/css/fontawesome.min.css' %}">
+    <!-- Bootstrap cdn icon -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <!-- Custom css -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <!-- jquery -->
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> -->
+    
+
+
+
+</head>
+
+<body style="min-width: 100vh;">
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <!-- Logo -->
+            <a class="navbar-brand" href="/"><img src="{% static 'img/logo_e.png'%}" class="logoimg" alt="PS-Thakkar"></a>
+
+            <!-- Toggle button for mobile view -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navbar links -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="/product" id="productDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Product
+                        </a>
+                        <ul class="dropdown-menu" id="category-list" aria-labelledby="productDropdown">
+                            <li><a class="dropdown-item" id="product-category" href="/product">All</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/aboutus">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contactus">Contact Us</a>
+                    </li>
+                    {% if request.user.is_staff  %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin">Dashboard</a>
+                    </li>
+                    {% else %}
+                    {% endif %}
+                    
+                </ul>
+
+                <!-- Space between elements -->
+                <div class="d-flex mx-2">
+                    &nbsp;
+                </div>
+
+                <!-- Search bar -->
+                <form class="d-flex pt-3 mx-4" method="POST" action="{% url 'search' %}">
+                    {% csrf_token %}    
+                    <input class="form-control me-2 bg-light" type="search" placeholder="search product" name="search" aria-label="Search">
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+
+                <!-- Like, Cart, Profile -->
+                <ul class="navbar-nav ml-3">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle p-0 m-2" id="profileDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="icons">
+                                <i class="bi bi-person-circle" ></i>
+                            </button>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+                            {% if user.is_authenticated %}
+                            <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                            <li><a class="dropdown-item" href="/order">Order</a></li>
+                            <li><a class="dropdown-item" href="/changepasswd">Change Passwoard</a></li>
+                            <li><a class="dropdown-item" href="/signout">Sign out</a></li>
+                            {% else %}
+                            <li><a class="dropdown-item" href="/signin">Sign In</a></li>
+                            <li><a class="dropdown-item" href="/signup">Sign Up</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/wishlist"><button class="icons d-flex">
+                           <i class="bi bi-heart-fill"></i><span id="wishlist_quantity">{{ wishlist|length }}</span>
+                        </button></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link " href="/cart"><button class="icons d-flex">
+                            <i class="bi bi-cart-check-fill"></i> <span id="cart_quantity">{{cart|length}}</span>
+                        </button></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% block body %}{% endblock body %}
+    <footer class="footer">
+        <span>Created By Malay Thakkar | &copy; 2023 All rights reserved.</span>
+    </footer>
+
+    <!-- Bootstrap JS and jQuery -->
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha384-GLhlTQ8iN1lYiVm3BOFkkfNdu1+KODLw/JTl/S5OMETJ65ILrZyD+L3kM6d5uMz"
+        crossorigin="anonymous"></script> -->
+    <script src="{% static 'bootstrap-5/js/bootstrap.bundle.min.js' %}"></script>
+        <!-- for category -->
+    <script src="{% static 'js/categories.js' %}"></script>
+
+</body>
+
+</html>

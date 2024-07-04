@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block body %}
+
+<style>
+    .bordercheckoutdiv {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+</style>
+<container class="productcontainer">
+    {% if messages %}
+    <div class="alert alert-primary" role="alert" id="messages-container">
+        {% for message in messages %}
+        {{ message }}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <script>
+        // Function to hide the messages container after 3 seconds
+        setTimeout(function () {
+            var messagesContainer = document.getElementById('messages-container');
+            if (messagesContainer) {
+                messagesContainer.style.display = 'none';
+            }
+        }, 3000); // 3000 milliseconds = 3 seconds
+    </script>
+    <h1 class="text-center">Checkout</h1>
+    <div class="container mt-4">
+        {% if cart_products %}
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Select existing Shipping Address</h3>
+                <form method="post" action="{% url 'placeorder' %}">
+                    {% csrf_token %}
+                    <label for="inputquestio" class="form-label fs-4 fw-bold">Buyer Full Name </label>
+                    <input type="text" class="form-control border border-secondary" name="Full_name" value="{{user}}">
+
+                    {% for address_detail in address %}
+                    <div class="form-check">
+                        <input class="form-check-input border border-dark mr-2" type="radio" name="shipping_address"
+                            id="shipping_address_{{ forloop.counter }}" value="{{ address_detail.id }}" required>
+                        <label class="form-check-label" for="shipping_address_{{ forloop.counter }}">
+                            {{ address_detail }}
+                        </label>
+                    </div>
+                    <br>
+                    {% endfor %}
+                    <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal"
+                        data-bs-target="#add_shipping_address">
+                        Add New Shipping Address
+                    </button>
+                    <div class="mb-3 mt-4">
+                        <label for="shipping_first_name" class="form-label">Order Note</label>
+                        <input type="text" class="form-control border-dark" id="shipping_first_name" name="ordernote">
+                    </div>
+                    <div class="mb-3">
+                        <label for="shipping_first_name" class="form-label">Payment Method:</label>
+                        <select class="form-select" id="payment_method" name="payment_method">
+                            <option value="cash">Cash</option>
+                            <option value="online">Online</option>
+                        </select>
+                    </div>
+            </div>
+            <div class="col-md-6 d-flex justify-content-center  bordercheckoutdiv">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in cart_products %}
+                            <tr>
+                                <td><img class="card-img" src="../../media/{{ product.img }}" alt="Product Image" />
+                                </td>
+                                <td class="font-weight-bold cartprodname">{{ product.name }}</td>
+                                <td class="font-weight-bold">{{ product.price }}</td>
+                                <td>
+                                    {% for key, value in cart_quantity.items %}
+                                    {% if key == product.product_id|stringformat:'s' %}
+                                    <span class="quantity-input" style="width: 70px;">{{ value }}</span>
+                                    {% endif %}
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <th colspan="2"></th>
+                                <th>Grand Total:</th>
+                                <th>{{total}} </th>
+                            </tr>
+                            <tr>
+                                <th colspan="2"></th>
+                                <th>Grand Total with GST(18%):</th>
+                                <th>{{gsttotal}} </th>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                    <div class="d-flex m-5 gap-5"><a href="{% url 'cart_summary' %}" class="btn btn-info">Update
+                            cart</a>
+                        <button type="submit" class="btn btn-primary">Place Order</button>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% else %}<h3> you don't have any order</h3>
+        {% endif %}
+    </div>
+</container>
+
+<!-- for add popup -->
+<!-- Modal -->
+<div class="modal" id="add_shipping_address" tabindex="-1" aria-labelledby="add_shipping_addressLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="add_shipping_addressLabel">Add New Shipping Address details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'shipping_address' %}">
+                    {% csrf_token %}
+                    <div class="bordercheckoutdiv">
+                        <div class="mb-3">
+                            <label for="shipping_first_name" class="form-label">First Name:</label>
+                            <input type="text" class="form-control" id="shipping_first_name" name="shipping_first_name"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="shipping_last_name" class="form-label">Last Name:</label>
+                            <input type="text" class="form-control" id="shipping_last_name" name="shipping_last_name"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="shipping_phone" class="form-label">Phone:</label>
+                            <input type="text" class="form-control" id="shipping_phone" name="shipping_phone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="shipping_email" class="form-label">Email:</label>
+                            <input type="email" class="form-control" id="shipping_email" name="shipping_email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="shipping_address" class="form-label">Address:</label>
+                            <textarea class="form-control" id="shipping_address" name="shipping_address"
+                                required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="shipping_city" class="form-label">City:</label>
+                            <input type="text" class="form-control" id="shipping_city" name="shipping_city" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="shipping_state" class="form-label">State:</label>
+                            <input type="text" class="form-control" id="shipping_state" name="shipping_state" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="shipping_note" class="form-label">Note:</label>
+                            <textarea class="form-control" id="shipping_note" name="shipping_note"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-info" type="submit">Add</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

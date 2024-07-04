@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load static %}
+{% block body %}
+<container class="productcontainer">
+{% if messages %}
+<div class="alert alert-primary" role="alert" id="messages-container"  style="position: absolute;z-index: 1;width: 100%;">
+  {% for message in messages %}
+  {{ message }}
+  {% endfor %}
+</div>
+{% endif %}
+
+<script>
+  // Function to hide the messages container after 3 seconds
+  setTimeout(function() {
+    var messagesContainer = document.getElementById('messages-container');
+    if (messagesContainer) {
+      messagesContainer.style.display = 'none';
+    }
+  }, 3000); // 3000 milliseconds = 3 seconds
+</script>
+<div class="pdr1">
+  <a href="/order"><button class="btn btn-info">Go back to order Page</button></a>
+</div>
+<h1>orderdetails</h1>
+<main class="main bd-grid" id="product-container">
+  <div class="container mt-5">
+    <div class="table-responsive">
+      {% if order %}
+      <h5><b>Your Order Id:</b>  {{order}}</h5>
+      <h5> <b>Your Payment Id:</b> {{order.payment}} </h5>
+      <h5> <b>Your Order Date:</b> {{order.created_at}} </h5>
+      <h5> <b>Your Order Status:</b> {{order.order_status}} </h5>
+      <h5> <b>Buyer Name:</b> {{order.full_name}} </h5>
+      <h5> <b>Order Notes:</b> {{order.order_note}} </h5>
+      <h5> <b>Shipping address:</b> {{order.shipping_address}} </h5>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in order_products %}
+          <tr>
+            <td>
+              <img class="card-img" src="../media/{{ product.img }}" alt="Product Image" />
+            </td>
+            <td>
+              <span class="font-weight-bold">{{ product.name }}</span>
+            </td>
+            <td>
+              <span class="font-weight-bold">{{ product.price }}</span>
+            </td>
+            <td>
+              <span class="font-weight-bold">{{ product.quantity }}</span>
+            </td>
+            <td>
+              <span class="font-weight-bold">{{ product.total_price }}</span>
+            </td>
+          </tr>
+          {% endfor %}
+          <tr>
+            <th colspan="3"></th>
+            <th>Grand Total:</th>
+            <th>{{order.order_total}} </th>
+          </tr>
+          <tr>
+            <th colspan="3"></th>
+            <th>Grand Total with GST(18%):</th>
+            <th>{{order.order_total_gst}} </th>
+          </tr>
+          <tr>
+            <th colspan="2"></th>
+            <th colspan="2" class="d-flex justify-content-center"><a href="{% url 'checkout' %}" class="btn btn-info">Download invoice</a></th>
+            
+          </tr>
+        </tbody>
+      </table>
+      {% else %}
+      <div colspan="6" class="align-self-center">
+        <h3>Your cart is Empty</h3>
+        <img src="{% static 'img/empty-cart.png' %}" alt="Empty Cart" style="width: 100%;" />
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+</container>
+
+{% endblock body %}

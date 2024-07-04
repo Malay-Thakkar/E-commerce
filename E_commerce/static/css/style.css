@@ -1,0 +1,380 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap');
+
+/*-- VARIABLES CSS--*/
+
+:root {
+    --first-color: white;
+    --accent-color: #FF5151;
+    --dark-color: #161616;
+}
+
+:root {
+    --body-font: 'Open Sans';
+    --h1-font-size: 1.5rem;
+    --h3-font-size: 1rem;
+    --normal-font-size: 0.938rem;
+    --smaller-font-size: 0.75rem;
+    --bs-body-bg: rgb(204, 249, 255);
+}
+
+@media screen and (min-width: 768px) {
+     :root {
+        --h1-font-size: 2rem;
+        --normal-font-size: 1rem;
+        --smaller-font-size: 0.813rem;
+    }
+}
+
+
+/* ==================Genral======================= */
+
+.body {
+    background-color: rgba(225, 248, 251, 0.61);
+    color: var(--dark-color);
+    font-family: var(--body-font);
+    min-height: 100vh;
+}
+
+*,
+::after,
+::before {
+    box-sizing: border-box;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+a {
+    text-decoration: none;
+}
+
+
+/* =================navigation bar======================= */
+
+.navbar {
+    background-color: #161925;
+}
+
+.nav-link {
+    color: #ffffff;
+}
+
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link.show {
+    color: #f1d102d4;
+}
+
+.navbar a {
+    color: rgb(255, 245, 201);
+    background-color: #161925;
+}
+
+.navbar a:hover {
+    color: #f1d302;
+    background-color: #161925;
+}
+
+.dropdown-menu {
+    background-color: #161925;
+}
+
+.navbar-toggler-icon {
+    background-color: #f1d102d4;
+}
+
+.logoimg {
+    width: 5rem;
+}
+
+.icons {
+    background-color: #FDFFFC;
+    border: 0;
+    width: 3rem;
+    height: 2rem;
+    border-radius: 15%;
+    padding: 0;
+    margin: auto;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* Add this CSS to your stylesheet */
+
+#carouselExampleIndicators {
+    height: 30rem;
+    margin: 0;
+}
+
+.carousel-inner img {
+    height: 100%;
+    object-fit: cover;
+}
+
+
+/*-- LAYAOUT --*/
+.productcontainer h1 {
+    margin: 2.5rem;
+    margin-bottom: 0;
+    font-size: 3rem;
+    font-weight: bolder;
+}
+
+.main {
+    padding: 2rem 0;
+}
+
+.bd-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    max-width: 1200px;
+    margin-left: 2.5rem;
+    margin-right: 2.5rem;
+    align-items: center;
+    gap: 2rem;
+}
+
+
+/*-- PAGES --*/
+
+.title-shop {
+    position: relative;
+    margin: 0 2.5rem;
+}
+
+.title-shop::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 72px;
+    height: 2px;
+    background-color: var(--dark-color);
+    margin-left: .25rem;
+}
+
+
+/*-- COMPONENT --*/
+
+.card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-width: 20rem;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-radius: 1rem;
+    box-shadow: 3px 5px 8px 0px #888888;
+    overflow: hidden;
+    background-color: var(--first-color);
+}
+
+.card__img {
+    width: 180px;
+    height: auto;
+    padding: 3rem 0;
+    transition: .5s;
+}
+
+.card__img img {
+    height: 180px;
+}
+
+.card__name {
+    position: absolute;
+    left: -25%;
+    top: 0;
+    width: 3.5rem;
+    height: 100%;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    text-align: center;
+    background-color: var(--dark-color);
+    color: #fff;
+    font-weight: bold;
+    transition: .5s;
+}
+
+.card__icon {
+    font-size: 1.5rem;
+    color: var(--dark-color);
+}
+
+.card__icon:hover {
+    color: var(--accent-color);
+}
+
+.card__precis {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    transition: .5s;
+}
+
+.card__precis h3 {
+    color: black;
+    display: block;
+    text-align: center;
+    margin-left: 4rem;
+}
+
+.card__preci {
+    display: block;
+    text-align: center;
+}
+
+.card__preci--before {
+    font-size: var(--smaller-font-size);
+    color: var(--accent-color);
+    margin-bottom: .25rem;
+}
+
+.card__preci--now {
+    font-size: var(--h3-font-size);
+    font-weight: bold;
+}
+
+
+/*Move left*/
+
+.card:hover {
+    border: 2px #000000;
+    box-shadow: 1rem 1rem 2rem #80858b;
+}
+
+.card:hover .card__name {
+    left: 0;
+}
+
+.card:hover .card__img {
+    transform: rotate(30deg);
+    margin-left: 3.5rem;
+}
+
+.card:hover .card__precis {
+    margin-left: 3.5rem;
+    padding: 0 1.5rem;
+}
+
+
+/*  button product detail page */
+
+.quantity-selector {
+    display: flex;
+    align-items: center;
+}
+
+.quantity-btn {
+    margin: 0 5px;
+}
+
+
+/* ========================product detail page======================= */
+
+.pdr1 {
+    display: flex;
+    margin: 3rem;
+}
+
+.pdr2 {
+    display: flex;
+    flex-direction: row;
+    margin: 3rem;
+}
+
+.pdr2c1 {
+    padding: 2rem;
+    width: 50%;
+}
+
+.pdr2c1 img {
+    width: 80%;
+}
+
+.pdr2c2 {
+    padding: 2rem;
+    width: 50%;
+}
+
+
+/* ======================profile page=============== */
+
+.profile {
+    padding: 3rem;
+    border: #161925;
+    background-color: white;
+    border-radius: 15%;
+}
+
+
+/* ======================cart======================= */
+
+.card {
+    max-width: 20rem;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    align-items: start;
+}
+
+.cartprodname {
+    margin-left: 3rem;
+}
+
+.quantity-selector {
+    justify-content: center;
+}
+
+.card-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+
+/* ======================footer===================== */
+.modal-content {
+    background-color: ivory;
+}
+
+footer {
+    bottom: 0;
+    padding: 10px;
+    width: 100%;
+    position: relative;
+    background-color: #000000;
+    color: white;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+
+/*-- MEDIA QUERIES --*/
+
+@media screen and (min-width: 1200px) {
+    .title-shop {
+        margin: 0 5rem;
+    }
+    .bd-grid {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+
+/* Media query for smaller screens */
+
+@media (max-width: 768px) {
+    .navbar-nav {
+        margin-right: 0;
+    }
+    .d-flex {
+        margin-left: 0;
+    }
+    .logoimg {
+        width: 4rem;
+    }
+}

@@ -1,0 +1,92 @@
+{% extends "sidebar.html" %}
+{% load static %}
+{% block dashboard-content %}
+<style>
+  label {
+    display: inline-block;
+    max-width: 100%;
+    margin-bottom: 5px;
+    font-weight: 100;
+    font-size: 18px;
+    /* Adjusted font size */
+  }
+
+</style>
+{% if messages %}
+<div class="alert alert-primary" role="alert" id="messages-container"
+    style="position: absolute;z-index: 1;width: 100%;">
+    {% for message in messages %}
+    {{ message }}
+    {% endfor %}
+</div>
+{% endif %}
+
+<script>
+    // Function to hide the messages container after 3 seconds
+    setTimeout(function () {
+        var messagesContainer = document.getElementById('messages-container');
+        if (messagesContainer) {
+            messagesContainer.style.display = 'none';
+        }
+    }, 3000); // 3000 milliseconds = 3 seconds
+</script>
+
+<h1>Products</h1>
+<main class="main bd-grid" id="product-container">
+    <div class="container mt-3">
+        <div class="d-flex">
+            <div class="mr-auto p-2">
+                <form method="post" action="{% url 'adminproductsupdate' product_id=prod.product_id%}">
+                    {% csrf_token %}
+                    <div class="col-md-6 my-2">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="inputname4" class="form-label fs-4 fw-bold">Name</label>
+                                <input type="text" class="form-control border border-secondary" id="inputname4" name="name" value="{{prod.name}}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="inputcontact4" class="form-label fs-4 fw-bold">Price</label>
+                                <input type="number" class="form-control border border-secondary" id="contact" name="price" value="{{prod.price}}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 my-2">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="inputEmail4" class="form-label fs-4 fw-bold">Unit</label>
+                                <input type="text" class="form-control border border-secondary" name="unit" id="inputEmail4" value="{{prod.unit}}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="inputAddress" class="form-label fs-4 fw-bold">Stock</label>
+                                <input type="number" class="form-control border border-secondary" id="inputAddress" name="stock" value="{{prod.stock}}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 my-2">
+                        <label for="inputquestio" class="form-label fs-4 fw-bold">Desc</label>
+                        <input type="text" class="form-control border border-secondary" id="inputquery" name="desc" value="{{prod.desc}}">
+                    </div>
+                    <div class="col-12 my-2">
+                        <label for="inputquestio" class="form-label fs-4 fw-bold">Img</label>
+                        <input type="file" class="form-control border border-secondary" id="inputquery" name="img" value="{{prod.img}}">
+                    </div>
+                    <div class="col-12 my-2">
+                        <label for="inputquestio" class="form-label fs-4 fw-bold">Category</label>
+                        <select class="form-control border border-secondary" name="category">
+                            <option selected>{{prod.category}}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12 my-3">
+                        <button type="submit" id="update-button" class="btn btn-info">update</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+
+</script>
+{% endblock dashboard-content %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+{% block body %}
+<style>
+.form-label{
+    font-weight: bolder;
+    margin-top: 2rem;
+}
+.input{
+    border: black;
+}
+</style>
+{% if messages %}
+<div class="alert alert-primary" role="alert" id="message-container">
+    {% for message in messages %}
+    {{ message }}
+    {% endfor %}
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var messageContainer = document.getElementById('message-container');
+        setTimeout(function () {
+            messageContainer.style.opacity = 0;
+            setTimeout(function () {
+                messageContainer.style.display = 'none';
+            }, 500);
+        }, 3000);
+    });
+</script>
+{% endif %}
+
+
+<container class="productcontainer">
+    <h1>Change Passwoard</h1>
+    <main class="main bd-grid">
+        <form method="post" class="row g-3">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">Old Passwoard</label>
+                <input type="password" class="form-control form-control-lg border border-dark" id="exampleInputEmail1" aria-describedby="emailHelp"
+                    name="oldpasswd" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">New Passwoard</label>
+                <input type="password" name="newpasswd" class="form-control form-control-lg border border-dark" id="exampleInputEmail1"
+                    aria-describedby="emailHelp" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Conform Passwoard</label>
+                <input type="password" name="conformpasswd" class="form-control form-control-lg border border-dark" id="exampleInputEmail1"
+                    aria-describedby="emailHelp" required>
+            </div>
+            <button class="btn btn-success my-5" name="update" type="submit">Update</button>
+        </form>
+    </main>
+</container>
+{% endblock body %}

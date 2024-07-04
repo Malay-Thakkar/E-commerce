@@ -1,0 +1,31 @@
+{% for order in orders %}
+<    <tr>
+    <td>
+        <span class="font-weight-bold">{{ order.id }}</span>
+    </td>
+    <td>
+        <span class="font-weight-bold ">{{ order.user }}</span>
+    </td>
+    <td>
+        <span class="font-weight-bold ">{{ order.order_status }}</span>
+    </td>
+    <td>
+        <span class="font-weight-bold ">{{ order.payment.status }}</span>
+    </td>
+    <td>
+        <span class="font-weight-bold">{{ order.order_total }}</span>
+    </td>
+    <td>
+        <span class="font-weight-bold">{{ order.created_at }}</span>
+    </td>
+    <td>
+        <a href="{% url 'adminorderdetail' order_id=order.id %}"><span
+class="font-weight-bold btn btn-success"><i class="bi bi-eye-fill"></i></span></a>
+    </td>
+    <td>
+        <a href="{% url 'adminorderupdate' order_id=order.id %}"><span
+            class="font-weight-bold btn btn-info">Update</span></a>
+    </td>
+    <td><button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{forloop.counter}}">Delete</button></td>
+    </tr>
+{% endfor %}

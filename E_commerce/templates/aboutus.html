@@ -1,0 +1,66 @@
+{% extends "base.html" %} {% load static %} {% block body %}
+<style>
+    /* Basic CSS for responsiveness */
+    
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    h1 {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    p {
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+    
+    @media only screen and (max-width: 600px) {
+        /* Adjustments for smaller screens */
+        h1 {
+            font-size: 24px;
+        }
+        p {
+            font-size: 14px;
+        }
+    }
+</style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>About Us</h1>
+        <p>Welcome to our e-commerce platform! We are passionate about providing you with the best shopping experience possible.
+        </p>
+        <p>Our mission is to offer a wide range of high-quality products at competitive prices, delivered with exceptional customer service.</p>
+        <p>Here are some key features of our platform:</p>
+        <ul>
+            <li>Easy-to-use interface for seamless browsing and shopping</li>
+            <li>Secure payment options for worry-free transactions</li>
+            <li>Fast and reliable shipping to get your orders to you as quickly as possible</li>
+            <li>Responsive customer support to assist you with any questions or concerns</li>
+        </ul>
+        <p>Whether you're looking for electronics, fashion, home goods, or anything in between, we've got you covered. Explore our shop today and discover the perfect items for you!</p>
+
+        <div class="row">
+            <div class="col">
+                <img src="{% static 'img/papa_front_card.png'%}" alt="">
+            </div>
+            <div class="col">
+                <img src="{% static 'img/papa_back_card.png'%}" alt="">
+            </div>
+
+        </div>
+    </div>
+</body>
+
+{% endblock body %}

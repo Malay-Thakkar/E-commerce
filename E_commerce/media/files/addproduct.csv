@@ -1,0 +1,28 @@
+Product_Name,Product_Price,Product_Unit,Product_Stock,Product_Desc,Product_Img,category_id
+Munch-box,350,box,35,this is test product description,munch-box.jpg,1
+Munch-pouch,323,box,23,this is test product description,munch-box.jpg,1
+coffee sunrice,340,box,23,this is test product description,coffee.jpg,1
+cerelac,340,box,23,this is test product description,cerelac.jpg,1
+coffee nescafe,211,box,21,this is test product description,coffee.jpg,1
+Kit-kat,300,box,30,this is test product description,kitkat.jpg,1
+Milky-bar,250,box,30,this is test product description,milkybar.jpg,1
+perk,323,box,23,this is test product description,perk.jpg,2
+celebration,1000,box,23,this is test product description,celebration.jpg,2
+Gems ball,300,box,123,this is test product description,gems.jpg,2
+CDM-10,330,box,50,this is test product description,cdm10.jpeg,2
+CDM-silk,330,box,50,this is test product description,silk.jpg,2
+shots,340,box,23,this is test product description,shots.jpg,2
+lickable,500,box,42,this is test product description,lickble.jpg,2
+5star,246,box,36,this is test product description,5star.jpg,2
+CDM_Family-Pack,130,box,10,this is test product description,cdmfamilypack.jpg,2
+CDM_valentine,300,box,10,this is test product description,dairymilk300.jpg,2
+Boanvita-pouch,30,box,10,this is test product description,boanvita.jpg,2
+Boanvita-jar,80,jar,10,this is test product description,boanvitajar.jpg,2
+chobrecks,30,box,10,this is test product description,chocobreck.jpg,2
+kinder joy,300,box,123,this is test product description,kinderjoy.jpg,3
+Chocos-pouch,30,box,10,this is test product description,chocos.jpg,3
+chamanbrash,200,jar,20,this is test product description,chamanbrash.jpg,4
+dabur red past,200,box,20,this is test product description,dabarred.jpg,4
+Honey,300,jar,20,this is test product description,honey.jpg,4
+center fresh,225,box,78,this is test product description,centerfresh.jpg,5
+center fruit,150,jar,19,this is test product description,centerfruit.jpg,5

@@ -1,0 +1,179 @@
+{% extends "sidebar.html" %} {% load static %} {% block styles %}
+<style>
+    /* Add custom CSS styles here */
+    
+    .productcontainer {
+        margin-top: 20px;
+    }
+    
+    .productcontainer h1 {
+        margin-bottom: 20px;
+    }
+    
+    .main {
+        display: flex;
+        justify-content: center;
+    }
+    
+    .container {
+        width: 80%;
+    }
+    
+    .table-responsive {
+        margin-top: 20px;
+    }
+    
+    .added-item {
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #f7f7f7;
+        border-radius: 5px;
+    }
+    
+    .delete-button {
+        margin-left: 10px;
+    }
+</style>
+{% endblock %} {% block dashboard-content %} {% if messages %}
+<div class="alert alert-primary" role="alert" id="messages-container" style="position: absolute;z-index: 1;width: 100%;">
+    {% for message in messages %} {{ message }} {% endfor %}
+</div>
+{% endif %}
+
+<!-- HTML code -->
+<container class="productcontainer">
+    <h1>Add order</h1>
+    <main class="main bd-grid" id="product-container">
+        <div class="container">
+            <form method="post" action="{% url 'adminorderadd' %}">
+                {% csrf_token %}
+                <div class="modal-body d-flex flex-column">
+                    <!-- Hidden input field to store the serialized productsObject -->
+                    <input type="hidden" name="productsObject" id="productsObjectInput">
+
+                    <label for="inputquestio" class="form-label fs-4 fw-bold">Full Name </label>
+                    <input type="text" class="form-control border border-secondary" name="fullname">
+
+                    <div class="mb-3">
+                        <label for="shipping_first_name" class="form-label fs-4 fw-bold">Payment Method:</label>
+                        <select class="form-select border border-secondary" name="payment_method">
+                            <option value="cash">Cash</option>
+                            <option value="online">Online</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="shipping_first_name" class="form-label fs-4 fw-bold">Payment Status:</label>
+                        <select class="form-select border border-secondary" name="payment_status">
+                            <option value="Not_Completed">Not_Completed</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="shipping_first_name" class="form-label fs-4 fw-bold">Order Status:</label>
+                        <select class="form-select border border-secondary" name="order_status">
+                            <option value="Pending">Pending</option>
+                            <option value="Accepted">Accepted</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <label for="inputquestio" class="form-label fs-4 fw-bold">Order Note</label>
+                    <input type="text" class="form-control border border-secondary" id="inputquery" name="order_note">
+                    <!-- Container to dynamically load product add form -->
+                    <div id="product-add-form-container"></div>
+                </div>
+                <!-- Display added items -->
+                <div id="addedItems">
+                    <!-- This is where added items will be displayed -->
+                </div>
+                <!-- Product list -->
+                <div class="table-responsive">
+                    <table class="table" style="height: 20rem;display: block;">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Price</th>
+                                <th>Add Item</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productList">
+                            {% for product in products %}
+                            <tr>
+                                <td>{{ product.product_id }}</td>
+                                <td><img class="card-img" src="../../media/{{ product.img }}" alt="Product Image"></td>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.price }}</td>
+                                <td>
+                                    <input type="number" class="quantityInput" value="1">
+                                    <button class="btn btn-info update-button addButton" onclick="addItemToOrder(this, '{{ product.product_id }}', '{{ product.name }}', '{{ product.price }}'); return false;">Add</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="m-5 d-flex">
+                    <button class="btn btn-info" type="submit">ADD Order</button>
+                    <button type="button" id="submitButton" class="btn btn-secondary mx-3" data-bs-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</container>
+
+<!-- Updated JavaScript code -->
+<script>
+    var productsObject = {};
+
+    function addItemToOrder(button, productId, productName, productPrice) {
+        var quantityInput = $(button).siblings(".quantityInput");
+        var quantity = parseInt(quantityInput.val());
+
+        if (quantity <= 0) {
+            alert("Quantity must be greater than zero.");
+            return;
+        }
+
+        // Check if the item already exists in the productsObject
+        if (productsObject.hasOwnProperty(productId)) {
+            // Update the quantity if the item already exists
+            productsObject[productId] = quantity;
+            //console.log("Product updated:", productId);
+
+            // Update the quantity in the display
+            $('#' + productId + '_quantity').text('Quantity: ' + quantity);
+        } else {
+            // Add the item if it doesn't exist
+            productsObject[productId] = quantity;
+            //console.log("Product added:", productId);
+            // Display added items
+            var addedItemsDiv = $('#addedItems');
+            var addedItemHtml = '<tr id="' + productId + '_row"><td class="added-item" style="padding-left: 1rem;">' + productName + '</td><td style="padding-left: 1rem;"><span id="' + productId + '_quantity">Quantity: ' + quantity + '</span></td><td style="padding-left: 1rem;">Price: ' + productPrice +
+                '</td><td style="padding-left: 1rem;"><button class="btn btn-danger delete-button" onclick="deleteItemFromOrder(\'' + productId + '\')">Delete</button></td></tr>';
+            addedItemsDiv.append(addedItemHtml);
+        }
+        //console.log("Products in order:", productsObject);
+    } 
+
+
+    function deleteItemFromOrder(productId) {
+        // Remove the entire row containing the item from the displayed list
+        $('#' + productId + '_row').remove();
+
+        // Remove the item from the productsObject dictionary
+        delete productsObject[productId];
+
+        //console.log("Product deleted:", productId);
+        //console.log("Products in order:", productsObject);
+    }
+
+    // Serialize the productsObject and set it as the value of the hidden input field before form submission
+    $(document).ready(function() {
+        $('form').submit(function() {
+            $('#productsObjectInput').val(JSON.stringify(productsObject));
+        });
+    });
+</script>
+{% endblock dashboard-content %}

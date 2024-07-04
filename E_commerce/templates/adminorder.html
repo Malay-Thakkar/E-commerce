@@ -1,0 +1,144 @@
+{% extends "sidebar.html" %} {% load static %} {% block dashboard-content %}
+<style>
+    .modal-content {
+        background-color: ivory;
+    }
+</style>
+{% if messages %}
+<div class="alert alert-primary" role="alert" id="messages-container" style="position: absolute;z-index: 1;width: 100%;">
+    {% for message in messages %} {{ message }} {% endfor %}
+</div>
+{% endif %}
+
+<script>
+    // Function to hide the messages container after 3 seconds
+    setTimeout(function() {
+        var messagesContainer = document.getElementById('messages-container');
+        if (messagesContainer) {
+            messagesContainer.style.display = 'none';
+        }
+    }, 3000); // 3000 milliseconds = 3 seconds
+</script>
+
+<container class="productcontainer">
+    <h1>Order</h1>
+    <main class="main bd-grid" id="product-container">
+        <div class="container">
+            <div class="d-flex">
+                <div class="mr-auto p-2">
+                    <a href="{% url 'adminorderadd' %}" class="btn btn-primary">Add order</a>
+                </div>
+                <div class="p-2" style="margin-left: 33rem;">
+                    <form class="d-flex pl-5">
+                        <div class="input-group">
+                            <input class="form-control bg-light" type="search" placeholder="Search order by user" id="searchbar" aria-label="Search">
+                            <button class="btn btn-outline-success" type="button">Search</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="table-responsive">
+                {% if orders %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Order Name</th>
+                            <th>Order Status</th>
+                            <th>Payment Status</th>
+                            <th>Order Amount</th>
+                            <th>Order date</th>
+                            <th>View Order</th>
+                            <th>Update Order</th>
+                            <th>Delete Order</th>
+                        </tr>
+                    </thead>
+                    <tbody id="Orderlist">
+                        {% for order in orders %}
+                        <tr>
+                            <td>
+                                <span class="font-weight-bold">{{ order.id }}</span>
+                            </td>
+                            <td>
+                                <span class="font-weight-bold ">{{ order.user }}</span>
+                            </td>
+                            <td>
+                                <span class="font-weight-bold ">{{ order.order_status }}</span>
+                            </td>
+                            <td>
+                                <span class="font-weight-bold ">{{ order.payment.status }}</span>
+                            </td>
+                            <td>
+                                <span class="font-weight-bold">{{ order.order_total }}</span>
+                            </td>
+                            <td>
+                                <span class="font-weight-bold">{{ order.created_at }}</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'adminorderdetail' order_id=order.id %}"><span
+                    class="font-weight-bold btn btn-success"><i class="bi bi-eye-fill"></i></span></a>
+                            </td>
+                            <td>
+                                <a href="{% url 'adminorderupdate' order_id=order.id %}"><span
+                                    class="font-weight-bold btn btn-info">Update</span></a>
+                            </td>
+                            <td><button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{forloop.counter}}">Delete</button></td>
+                            </tr>
+                            {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div colspan="6" class="align-self-center">
+                    <h3>you don't have any order</h3>
+                    <img src="{% static 'img/empty-box.jpeg' %}" alt="Empty Cart" style="width: 100%;" />
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</container>
+
+{% for order in orders %}
+<!-- for delete popup -->
+<!-- Modal -->
+<div class="modal" id="deleteModal-{{forloop.counter}}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'adminorderdetaildelete' order_id=order.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    Are you sure you want to permanently delete this category?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" type="submit">delete</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %} 
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        // Intercept input in the search box
+        $('#searchbar').on('input', function () {
+            var query = $(this).val();  // Get the value typed in the search box
+            $.ajax({
+                type: "GET",
+                url: "{% url 'searchorder' %}",  // URL to your search endpoint
+                data: {
+                    'search': query,  // Pass the query as data to the server
+                },
+                success: function (response) {
+                    $('#Orderlist').html(response.html);
+                }
+            });
+        });
+    });
+</script>
+{% endblock dashboard-content %}

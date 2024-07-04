@@ -1,0 +1,102 @@
+{% extends "base.html" %} 
+{% load static }
+{% block body %}
+<style>
+        .container {
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        strong {
+            font-weight: bold;
+        }
+</style>
+
+<body>
+    <div class="container">
+        {% if messages %}
+<div class="alert alert-primary" role="alert" id="messages-container">
+  {% for message in messages %}
+  {{ message }}
+  {% endfor %}
+</div>
+{% endif %}
+
+<script>
+  // Function to hide the messages container after 3 seconds
+  setTimeout(function() {
+    var messagesContainer = document.getElementById('messages-container');
+    if (messagesContainer) {
+      messagesContainer.style.display = 'none';
+    }
+  }, 3000); // 3000 milliseconds = 3 seconds
+</script>
+
+        <div class="profile">
+            <h1>User Details</h1>
+            <ul>
+                {% for user in myuser %}
+                    <li><strong>User ID:</strong> {{ user.id }}</li>
+                    <li><strong>Username:</strong> {{ user.username }}</li>
+                    <li><strong>First Name:</strong> {{ user.first_name }}</li>
+                    <li><strong>Last Name:</strong> {{ user.last_name }}</li>
+                    <li><strong>Email:</strong> {{ user.email }}</li>
+                    <li><strong>Is Active:</strong> {{ user.is_active }}</li>
+                    <li><strong>Last Login:</strong> {{ user.last_login }}</li>
+                    <li><strong>Date Joined:</strong> {{ user.date_joined }}</li>
+                    <li><strong>Phone:</strong> {{ user.phone }}</li>
+                    <li><strong>Address:</strong> {{ user.Address }}</li>
+                {% endfor %}
+            </ul>
+            <a href="{% url 'updateuser' %}" class="btn btn-success my-3">Update Profile</a>
+            <a href="{% url 'changepasswd' %}" class="btn btn-success my-3">Change Passwoard</a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                Delete Account Permanent
+              </button>
+
+            <a href="{% url 'sigout' %}" class="btn btn-secondary my-3">Sign-out</a>
+        </div>
+    </div>
+
+
+<!-- for final delete popup -->
+  <!-- Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">Confirm Delete Account</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to permanently delete your account?
+        </div>
+        <div class="modal-footer">
+          <a href="{% url 'deleteuser' %}" class="btn btn-danger">Permanent Delete Account</a>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</body>
+
+{% endblock body %}

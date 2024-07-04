@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+{% block body %}
+
+<style>
+    .errorpage {
+        background-image: url("{% static 'img/404error.png' %}");
+        background-size: cover;
+        background-position: center;    
+        width: 100%;
+        min-height:100vh;
+        color: white;
+        display: flex;
+        flex-direction: column; /* Set flex-direction to column */
+        align-items: center;
+        justify-content: center;
+        text-align: center; 
+    }
+
+    .errorpage h1 {
+        margin-bottom: 20px; /* Add margin bottom to create space between the headings */
+    }
+
+</style>
+<div class="errorpage">
+   <h1>Thank You for Connecting us</h1>
+   <h1>Go Back To Home Page <a href="/" ><button class="btn btn-success">Go Home</button></a></h1>
+</div>
+{% endblock body %}

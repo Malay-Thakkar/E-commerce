@@ -1,0 +1,9 @@
+{% for Category in Categorys %}
+<tr>
+    <td>{{Category.category_id}}</td>
+    <td>{{Category.category}}</td>
+    <td><button class="btn btn-info " data-bs-toggle="modal" data-bs-target="#updateModal-{{forloop.counter}}">Update</button></td>
+    <td><button class="btn btn-danger " data-bs-toggle="modal" data-bs-target="#deleteModal-{{forloop.counter}}">Delete</button></td>
+    
+</tr>
+{% endfor %}

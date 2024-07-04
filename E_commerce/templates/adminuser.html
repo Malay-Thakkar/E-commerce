@@ -1,0 +1,96 @@
+{% extends "sidebar.html" %}
+{% load static %}
+{% block dashboard-content %}
+{% if messages %}
+<div class="alert alert-primary" role="alert" id="messages-container"  style="position: absolute;z-index: 1;width: 100%;">
+  {% for message in messages %}
+  {{ message }}
+  {% endfor %}
+</div>
+{% endif %}
+
+<script>
+  // Function to hide the messages container after 3 seconds
+  setTimeout(function() {
+    var messagesContainer = document.getElementById('messages-container');
+    if (messagesContainer) {
+      messagesContainer.style.display = 'none';
+    }
+  }, 3000); // 3000 milliseconds = 3 seconds
+</script>
+
+<container class="productcontainer">
+  <h1>User</h1>
+  <main class="main bd-grid" id="product-container">
+    <div class="container mt-5">
+      <div class="table-responsive">
+        {% if users %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th>User ID</th>
+              <th>first name</th>
+              <th>Last name</th>
+              <th>Contact no</th>
+              <th>View</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr>
+              <td>
+                <span class="font-weight-bold cartprodname">{{ user.id }}</span>
+              </td>
+              <td>
+                <span class="font-weight-bold cartprodname">{{ user.first_name }}</span>
+              </td>
+              <td>
+                <span class="font-weight-bold">{{ user.last_name }}</span>
+              </td>
+              <td>
+                <span class="font-weight-bold">{{ user.phone }}</span>
+              </td>
+              <td>
+                <a href="{% url 'adminuserdetail' user_id=user.id %}"><span class="font-weight-bold btn btn-success"><i class="bi bi-eye-fill"></i></span></a>
+              </td>
+              <td><button class="btn btn-danger delete-button" data-bs-toggle="modal" data-bs-target="#deleteModal-{{forloop.counter}}">Delete</button></td>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div colspan="6" class="align-self-center">
+          <h3>you don't have any user</h3>
+          <img src="{% static 'img/empty-box.jpeg' %}" alt="Empty Cart" style="width: 100%;" />
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </main>
+</container>
+
+{% for user in users %}
+<div class="modal" id="deleteModal-{{forloop.counter}}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to permanently delete this product?
+            </div>
+            <div class="modal-footer">
+                <form method="post" action="{% url 'adminuserdelete' user_id=user.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button class="btn btn-danger" type="submit">Delete</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock dashboard-content %}
+

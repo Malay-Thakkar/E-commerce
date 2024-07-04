@@ -1,0 +1,281 @@
+{% extends "sidebar.html" %} {% load static %} {% block dashboard-content %}
+<style>
+    .modal-content {
+        background-color: ivory;
+    }
+</style>
+{% if messages %}
+<div class="alert alert-primary" role="alert" id="messages-container" style="position: absolute;z-index: 1;width: 100%;">
+    {% for message in messages %} {{ message }} {% endfor %}
+</div>
+{% endif %}
+
+<script>
+    // Function to hide the messages container after 3 seconds
+    setTimeout(function() {
+        var messagesContainer = document.getElementById('messages-container');
+        if (messagesContainer) {
+            messagesContainer.style.display = 'none';
+        }
+    }, 3000); // 3000 milliseconds = 3 seconds
+</script>
+
+<h1>Products</h1>
+<main class="main bd-grid" id="product-container">
+    <div class="container mt-2">
+        <div class="d-flex">
+            <div class="mr-auto p-2">
+                <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#add_productModal">
+          Add Product
+        </button>
+                <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#add_multiple_productModal">
+          Add Multiple Products
+        </button>
+            </div>
+            <div class="p-2" style="margin-left: 20rem;">
+                    <form class="d-flex pl-5">
+                        <div class="input-group">
+                            <input class="form-control bg-light" type="search" placeholder="Search product" id="searchbar" aria-label="Search">
+                            <button class="btn btn-outline-success" type="button">Search</button>
+                        </div>
+                    </form>
+            </div>
+        </div>
+        <div class="d-flex flex-wrap align-items-center mb-3">
+        </div>
+        <div class="table-responsive">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Unit</th>
+                            <th>Stock</th>
+                            <th>Category</th>
+                            <th>Update Item</th>
+                            <th>Delete Item</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productList">
+                        {% for product in products %}
+                        <tr>
+                            <td>{{product.product_id}}</td>
+                            <td><img class="card-img" src="../../media/{{product.img}}" alt="Product Image"></td>
+                            <td>{{product.name}}</td>
+                            <td>{{product.price}}</td>
+                            <td>{{product.unit}}</td>
+                            <td>{{product.stock}}</td>
+                            <td>{{product.category}}</td>
+                            <td><button class="btn btn-info update-button" data-bs-toggle="modal" data-bs-target="#updateModal-{{forloop.counter}}">Update</button></td>
+                            <td><button class="btn btn-danger delete-button" data-bs-toggle="modal" data-bs-target="#deleteModal-{{forloop.counter}}">Delete</button></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- for add product popup -->
+<!-- Modal -->
+<div class="modal" id="add_productModal" tabindex="-1" aria-labelledby="add_productModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="add_productModalLabel">Add product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'adminproductadd' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="col-md-6 my-2">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="inputname4" class="form-label fs-4 fw-bold">Name</label>
+                                    <input type="text" class="form-control border border-secondary" id="inputname4" name="name" value="{{prod.name}}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="inputcontact4" class="form-label fs-4 fw-bold">Price</label>
+                                    <input type="number" class="form-control border border-secondary" id="contact" name="price" value="{{prod.price}}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 my-2">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="inputEmail4" class="form-label fs-4 fw-bold">Unit</label>
+                                    <input type="text" class="form-control border border-secondary" name="unit" id="inputEmail4" value="{{prod.unit}}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="inputAddress" class="form-label fs-4 fw-bold">Stock</label>
+                                    <input type="number" class="form-control border border-secondary" id="inputAddress" name="stock" value="{{prod.stock}}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 my-2">
+                            <label for="inputquestio" class="form-label fs-4 fw-bold">Desc</label>
+                            <input type="text" class="form-control border border-secondary" id="inputquery" name="desc" value="{{prod.desc}}">
+                        </div>
+                        <div class="col-12 my-2">
+                            <label for="inputquestio" class="form-label fs-4 fw-bold">Img</label>
+                            <input type="file" class="form-control border border-secondary" multiple id="inputquery" name="img">
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category:</label>
+                            <select id="category" name="category" class="form-control">
+                      {% for category in categorys %}
+                      <option value="{{ category.category_id }}">{{ category.category }}</option>
+                      {% endfor %}
+                  </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-info" type="submit">ADD</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- for add multiple product popup -->
+<!-- Modal -->
+<div class="modal fade" id="add_multiple_productModal" tabindex="-1" aria-labelledby="add_multiple_productModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="add_multiple_productModalLabel">Upload products csv file</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'uploadproductfile' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="file" id="myFile" name="files">
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+</div>
+
+<!-- for final delete popup -->
+<!-- Modal -->
+{% for prod in products %}
+<div class="modal" id="deleteModal-{{forloop.counter}}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to permanently delete this product?
+            </div>
+            <div class="modal-footer">
+                <form method="post" action="{% url 'adminproductsdelete' product_id=prod.product_id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button class="btn btn-danger" type="submit">Delete</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- for update popup -->
+<!-- Modal -->
+{% for prod in products %}
+<div class="modal" id="updateModal-{{forloop.counter}}" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateModalLabel">Update Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'adminproductsupdate' product_id=prod.product_id %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="col-md-6 my-2">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="inputname4" class="form-label fs-4 fw-bold">Name</label>
+                                <input type="text" class="form-control border border-secondary" id="inputname4" name="name" value="{{prod.name}}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="inputcontact4" class="form-label fs-4 fw-bold">Price</label>
+                                <input type="number" class="form-control border border-secondary" id="contact" name="price" value="{{prod.price}}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 my-2">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="inputEmail4" class="form-label fs-4 fw-bold">Unit</label>
+                                <input type="text" class="form-control border border-secondary" name="unit" id="inputEmail4" value="{{prod.unit}}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="inputAddress" class="form-label fs-4 fw-bold">Stock</label>
+                                <input type="number" class="form-control border border-secondary" id="inputAddress" name="stock" value="{{prod.stock}}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 my-2">
+                        <label for="inputquestio" class="form-label fs-4 fw-bold">Desc</label>
+                        <input type="text" class="form-control border border-secondary" id="inputquery" name="desc" value="{{prod.desc}}">
+                    </div>
+                    <div class="col-12 my-2">
+                        <label for="inputquestio" class="form-label fs-4 fw-bold">Img</label>
+                        <input type="file" class="form-control border border-secondary" id="inputquery" value="{{prod.img}}" name="img">
+                        <!-- Display existing image -->
+                        <img id="existing-image" src="../../media/{{prod.img}}" alt="Existing Image" class="card-img">
+                    </div>
+                    <div class="form-group">
+                        <label for="category" class="form-label fs-4 fw-bold">Category:</label>
+                        <select id="category" name="category" class="form-control border border-secondary">
+                        {% for category in categorys %}
+                        <option value="{{ category.category_id }}" {% if category.category_id == prod.category_id %}selected{% endif %}>{{ category.category }}</option>
+                        {% endfor %}
+                    </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-info" type="submit">update</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        // Intercept input in the search box
+        $('#searchbar').on('input', function() {
+            var query = $(this).val();  // Get the value typed in the search box
+            $.ajax({
+                type: "GET",
+                url: "{% url 'searchproduct' %}", 
+                data: {
+                    'search': query,  // Pass the query as data to the server
+                },
+                success: function(response) {
+                    $('#productList').html(response.html);  // Update the product container with the search results HTML snippet
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock dashboard-content %}

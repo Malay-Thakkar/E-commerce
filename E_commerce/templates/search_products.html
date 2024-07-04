@@ -1,0 +1,12 @@
+{% for product in products %}
+<tr>
+    <td><img class="card-img" src="../../media/{{product.img}}" alt="Product Image"></td>
+    <td>{{product.name}}</td>
+    <td>{{product.price}}</td>
+    <td>{{product.unit}}</td>
+    <td>{{product.stock}}</td>
+    <td>{{product.category}}</td>
+    <td><button class="btn btn-info update-button" data-bs-toggle="modal" data-bs-target="#updateModal-{{forloop.counter}}">Update</button></td>
+    <td><button class="btn btn-danger delete-button" data-bs-toggle="modal" data-bs-target="#deleteModal-{{forloop.counter}}">Delete</button></td>
+</tr>
+{% endfor %}

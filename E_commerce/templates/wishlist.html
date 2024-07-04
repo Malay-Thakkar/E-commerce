@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block body %}
+<container class="productcontainer">
+  {% if messages %}
+  <div class="alert alert-primary" role="alert" id="messages-container">
+    {% for message in messages %}
+    {{ message }}
+    {% endfor %}
+  </div>
+  {% endif %}
+  
+  <script>
+    // Function to hide the messages container after 3 seconds
+    setTimeout(function() {
+      var messagesContainer = document.getElementById('messages-container');
+      if (messagesContainer) {
+        messagesContainer.style.display = 'none';
+      }
+    }, 3000); // 3000 milliseconds = 3 seconds
+  </script>
+  
+  <h1>Wishlist </h1>
+  <main class="main bd-grid" id="product-container">
+    <div class="container mt-5">
+      <div class="table-responsive">
+        {% if wishlist_products %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Price</th>
+              <th>Delete Item</th>
+              <th>Add to cart</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for product in wishlist_products %}
+           
+            <tr>
+              <td>
+                <img class="card-img" src="../media/{{ product.img }}" alt="Product Image" />
+              </td>
+              <td>
+                <span class="font-weight-bold cartprodname">{{ product.name }}</span>
+              </td>
+              <td>
+                <span class="font-weight-bold">{{ product.price }}</span>
+              </td>
+              <td>
+                <button class="btn btn-danger delete-product" data-index="{{ product.product_id }}">Delete</button>
+              </td>
+              <td>
+                <button class="btn btn-success add-cart" data-index="{{ product.product_id }}">Add to Cart<i
+                  class="bi bi-cart-check-fill"></i></button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div colspan="6" class="align-self-center">
+          <h3>Your Wishlist is Empty</h3>
+          <img src="{% static 'img/empty-cart.png' %}" alt="Empty Cart" style="width: 100%;" />
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </main>
+</container>
+
+<script>
+  // delete product in wishlist
+  $(document).on('click', '.delete-product', function (e) {
+    e.preventDefault()
+    var productid = $(this).data('index');
+    $.ajax({
+      type: 'POST',
+      url: "{% url 'wishlist_delete' %}",
+      data: {
+        product_id: productid,
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+        action: 'post'
+      },
+      success: function (json) {
+        location.reload();
+      },
+      error: function (xhr, errmsg, err) {
+        console.log(errmsg);
+      }
+    });
+  });
+
+  //add to cart
+  $(document).on('click', '.add-cart', function (e) {
+    e.preventDefault()
+    var productid = $(this).data('index');
+    $.ajax({
+      type: 'POST',
+      url: "{% url 'cart_add' %}",
+      data: {
+        product_id: productid,
+        product_qty: 1,
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+        action: 'post'
+      },
+      success: function (json) {
+        document.getElementById('cart_quantity').textContent = json.cart_quantity
+        location.reload()
+      },
+      error: function (xhr, errmsg, err) {
+        console.log(errmsg);
+      }
+    });
+  });
+
+</script>
+{% endblock %}

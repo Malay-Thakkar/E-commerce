@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load static %}
+{% block body %}
+<style>
+    #side_nav {
+        background: #121620;
+        min-width: 250px;
+        max-width: 250px;
+        transition: all 0.3s;
+    }
+
+    .content {
+        min-height: 100vh;
+        width: 100%;
+    }
+
+    hr.h-color {
+        background: #eee;
+    }
+
+    .sidebar li.active {
+        background: #eee;
+        border-radius: 8px;
+    }
+
+    .sidebar li.active a,
+    .sidebar li.active a:hover {
+        color: #1d1d1d;
+    }
+
+    .sidebar li a {
+        color: #fff;
+    }
+
+    @media(max-width: 767px) {
+        #side_nav {
+            margin-left: -250px;
+            position: absolute;
+            min-height: 100vh;
+            z-index: 1;
+
+        }
+
+        #side_nav.active {
+            margin-left: 0;
+        }
+    }
+</style>
+
+<div class="main-container d-flex">
+    <div class="sidebar" id="side_nav">
+        <div class="header-box px-2 pt-3 pb-4 d-flex justify-content-between">
+            <h1 class="fs-4"><a class="navbar-brand" href="/">
+                {% comment %} <img src="{% static 'img/logo_e.png'%}" class="logoimg"
+                        alt="PS-Thakkar"> {% endcomment %}
+            </a><span class="text-white">PS-Thakkar</span></h1>
+            <button class="btn d-md-none d-block close-btn px-1 py-0 text-white"><i
+                    class="bi bi-view-list"></i></button>
+        </div>
+
+        <ul class="list-unstyled px-2">
+            <li><a href="/admin" class="text-decoration-none px-3 py-2 px-2 d-block"><i
+                        class="bi bi-house-door px-2"></i> Dashboard</a></li>
+            <!-- <li class=""><a href="/admin" class="text-decoration-none px-3 py-2 px-2 d-block"><i class="bi bi-list px-2"></i>
+                    Projects</a></li>
+            <li class=""><a href="#" class="text-decoration-none px-3 py-2 px-2 d-block d-flex justify-content-between">
+                    <span><i class="bi bi-chat px-2"></i> Messages</span>
+                    <span class="bg-dark rounded-pill text-white py-0 px-2">02</span>
+                </a>
+            </li> -->
+            <li class=""><a href="/admin/order" class="text-decoration-none px-3 py-2 px-2 d-block"><i
+                        class="bi bi-receipt px-2"></i>
+                    Order</a></li>
+            <li class=""><a href="/admin/products" class="text-decoration-none px-3 py-2 px-2 d-block"><i
+                        class="bi bi-basket3-fill px-2"></i>
+                    Products</a></li>
+            <li class=""><a href="/admin/category" class="text-decoration-none px-3 py-2 px-2 d-block"><i
+                        class="bi bi-tags-fill px-2"></i>
+                    category</a></li>
+            <li class=""><a href="/admin/users" class="text-decoration-none px-3 py-2 d-block"><i
+                        class="bi bi-person-fill px-2"></i>
+                    Users</a></li>
+
+        </ul>
+        <hr class="h-color mx-2">
+
+        <ul class="list-unstyled px-2">
+            <li class=""><a href="{% url 'settings' %}" class="text-decoration-none px-3 py-2 d-block"><i class="bi bi-gear"></i>
+                    Settings</a></li>
+            <li class=""><a href="#" class="text-decoration-none px-3 py-2 d-block"><i class="bi bi-bell"></i>
+                    Notifications</a></li>
+
+        </ul>
+    </div>
+
+    <div class="content">
+        <nav class="navbar navbar-expand-md navbar-light bg-light" style="position: absolute;">
+            <div class="container-fluid">
+                <div class="d-flex justify-content-between d-md-none d-block">
+                    <button class="btn px-1 py-0 open-btn me-2" id="openBtn"><i class="bi bi-view-list"></i></button>
+                    <a class="navbar-brand fs-4" href="#">PS-Thakkar</a>
+                </div>
+                <button class="navbar-toggler p-0 border-0" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <!-- <i class="bi bi-list"></i> -->
+                </button>
+            </div>
+        </nav>
+
+        <div class="dashboard-content px-3 pt-4">
+            {% block dashboard-content %}{% endblock dashboard-content %}
+        </div>
+    </div>
+</div>
+<script>
+    $(".sidebar ul li").on('click', function () {
+        $(".sidebar ul li.active").removeClass('active');
+        $(this).addClass('active');
+    });
+
+    $('.open-btn').on('click', function () {
+        $('.sidebar').addClass('active');
+
+    });
+    $('.close-btn').on('click', function () {
+        $('.sidebar').removeClass('active');
+
+    })
+</script>
+{% endblock body %}
