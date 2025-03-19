@@ -1,0 +1,8 @@
+django
+psycopg2-binary
+djangorestframework
+django-jazzmin
+python-dotenv
+requests
+pandas
+django-debug-toolbar
