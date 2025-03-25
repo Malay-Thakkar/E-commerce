@@ -1,6 +1,99 @@
-# E-commerce
+# E-Commerce Project Setup Guide
 
-Customer View:
+## **For Dockerized App Setup**
+
+1. **Build and Start the Docker Containers:**
+   ```sh
+   docker compose up --build -d
+   ```
+   
+2. **Check Running Containers:**
+   ```sh
+   docker ps
+   ```
+   
+3. **Apply Migrations:**
+   ```sh
+   docker exec -it ps_thakker_e_commerce python manage.py migrate
+   ```
+   
+4. **Create a Superuser (Optional for Admin Panel):**
+   ```sh
+   docker exec -it ps_thakker_e_commerce python manage.py createsuperuser
+   ```
+   
+5. **Check Logs:**
+   ```sh
+   docker logs -f ps_thakker_e_commerce
+   ```
+   
+6. **Restart Containers:**
+   ```sh
+   docker compose restart
+   ```
+   
+7. **Stop Containers:**
+   ```sh
+   docker compose down
+   ```
+
+## **For Normal Setup (Without Docker)**
+
+### **1. Create and Activate Virtual Environment**
+#### **Ubuntu/Linux/macOS:**
+```sh
+virtualenv venv
+source venv/bin/activate
+```
+#### **Windows:**
+```sh
+virtualenv venv
+. venv/bin/activate
+```
+
+### **2. Install Dependencies**
+```sh
+pip install -r requirements.txt
+```
+
+### **3. Setup PostgreSQL Database**
+```sh
+sudo apt update
+sudo apt install postgresql postgresql-contrib -y
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+sudo systemctl status postgresql
+```
+
+### **4. Configure PostgreSQL**
+```sh
+sudo -u postgres psql
+```
+Inside PostgreSQL shell, run:
+```sql
+CREATE DATABASE e_commerce;
+CREATE USER postgres WITH PASSWORD 'postgres';
+ALTER USER postgres WITH SUPERUSER;
+GRANT ALL PRIVILEGES ON DATABASE e_commerce TO postgres;
+\q
+```
+
+### **5. Apply Migrations and Start the Server**
+```sh
+python manage.py migrate
+python manage.py runserver
+```
+
+
+
+
+
+
+
+
+
+
+# Customer View:
 ![image](https://github.com/Malay-Thakkar/E-commerce/assets/78149426/57257787-2e48-47a4-a88e-ed1e1082949c)
 ![image](https://github.com/Malay-Thakkar/E-commerce/assets/78149426/00b59bac-a6df-485e-b6f2-d5f71c7dd28c)
 ![image](https://github.com/Malay-Thakkar/E-commerce/assets/78149426/aa45d5ce-253c-4780-9af5-cfe67989e673)
@@ -11,7 +104,7 @@ Customer View:
 ![image](https://github.com/Malay-Thakkar/E-commerce/assets/78149426/44ebd03b-909a-424f-ab47-c0c35c4df4a6)
 ![image](https://github.com/Malay-Thakkar/E-commerce/assets/78149426/792d23b0-aad3-4903-bc1c-0eec2b3d0ea5)
 
-Admin View:
+# Admin View:
 ![image](https://github.com/Malay-Thakkar/E-commerce/assets/78149426/05381910-5e20-42a6-a646-5212e96d6729)
 ![image](https://github.com/Malay-Thakkar/E-commerce/assets/78149426/eaf9e4ea-78ab-4a58-879c-641a187f663e)
 ![image](https://github.com/Malay-Thakkar/E-commerce/assets/78149426/9b8c57af-59a8-46a2-9c63-0538915db922)
