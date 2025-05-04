@@ -169,18 +169,19 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_PASSWORD")
 #Elasticsearch
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': 'ps-thakkar_elasticsearch:9200'
-    },
+        'hosts': f"{os.getenv('ELASTICSEARCH_HOST', 'ps-thakkar_elasticsearch')}:{os.getenv('ELASTICSEARCH_PORT', '9200')}"
+    }
 }
 
+
 # Celery Configuration
-CELERY_BROKER_URL = 'redis://ps-thakkar_redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://ps-thakkar_redis:6379/0'
-CELERY_TIMEZONE = 'Asia/Kolkata'
+CELERY_BROKER_URL = os.getenv('ELASTICSEARCH_HOST', 'redis://ps-thakkar_redis:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND','redis://ps-thakkar_redis:6379/0')
+CELERY_TIMEZONE = os.getenv('CELERY_TIMEZONE','Asia/Kolkata')
 
 # Task specific settings
-CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 60
+CELERY_TASK_TRACK_STARTED = os.getenv('CELERY_TASK_TRACK_STARTED',True)
+CELERY_TASK_TIME_LIMIT = os.getenv('CELERY_TASK_TIME_LIMIT',60)
 
 
 USE_S3 = os.getenv('USE_S3', 'False') == 'True'
