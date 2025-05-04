@@ -1,0 +1,130 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME}_web
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/E-commerce
+      - ./staticfiles:/app/staticfiles
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      DJANGO_SECRET_KEY: ${SECRET_KEY}
+      DJANGO_DEBUG: ${DEBUG}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
+    entrypoint: ["/E-commerce/entrypoint.sh", "web"]
+    networks:
+      - default
+
+  db:
+    image: postgres:15
+    container_name: ${COMPOSE_PROJECT_NAME}_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - default
+
+  redis:
+    image: redis:6.2
+    container_name: ${COMPOSE_PROJECT_NAME}_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - default
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME}_celery
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - .:/E-commerce
+    env_file:
+      - .env
+    environment:
+      DJANGO_SECRET_KEY: ${SECRET_KEY}
+      DJANGO_DEBUG: ${DEBUG}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
+    command: celery -A E_commerce worker --loglevel=info
+    entrypoint: ["/E-commerce/entrypoint.sh", "celery"]
+    networks:
+      - default
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME}_celery_beat
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - .:/E-commerce
+    env_file:
+      - .env
+    environment:
+      DJANGO_SECRET_KEY: ${SECRET_KEY}
+      DJANGO_DEBUG: ${DEBUG}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
+    command: celery -A E_commerce beat --loglevel=info
+    entrypoint: ["/E-commerce/entrypoint.sh", "celery-beat"]
+    networks:
+      - default
+
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.13
+    container_name: ${COMPOSE_PROJECT_NAME}_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "${ELASTICSEARCH_PORT}:${ELASTICSEARCH_PORT}"
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://${ELASTICSEARCH_HOST}:${ELASTICSEARCH_PORT} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+
+networks:
+  default:

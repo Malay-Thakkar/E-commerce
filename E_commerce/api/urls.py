@@ -1,5 +1,5 @@
 from django.urls import path, include
-from api.views import ProductViewSet, CategoryViewSet, uploadproductfile
+from api.views import ProductViewSet, CategoryViewSet, uploadproductfile, export_products_csv
 from rest_framework import routers
 from django.conf import settings
 from django.conf.urls.static import static
@@ -16,6 +16,7 @@ router.register(r"category", CategoryViewSet)
 urlpatterns = [
     path("", include(router.urls)),
     path("uploadproduct", uploadproductfile, name="uploadproductfile"),
+    path('export-products/', export_products_csv, name='export_products_csv'),
 ]
 
 if settings.DEBUG:
