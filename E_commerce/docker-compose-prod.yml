@@ -1,0 +1,57 @@
+  # 222  docker network inspect bridge
+  # 223  docker network connect bridge nginx
+  # 224  docker network connect bridge ps_thakker_e_commerce
+
+
+
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ps_thakker_e_commerce
+    volumes:
+      - .:/E-commerce
+      - ./static:/app/static
+      - ./staticfiles:/app/staticfiles  # Add this line
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - E_commerce/.env
+    entrypoint: ["/E-commerce/entrypoint.sh"]  
+
+  # nginx:
+  #   image: nginx
+  #   container_name: nginx
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+  #     - ./staticfiles:/app/staticfiles  # This ensures Nginx can access static files
+  #   depends_on:
+  #     - web
+
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: e_commerce
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d e_commerce"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  staticfiles:  # Add this volume to store static files

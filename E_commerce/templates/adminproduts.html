@@ -22,7 +22,7 @@
 
 <h1>Products</h1>
 <main class="main bd-grid" id="product-container">
-    <div class="container mt-2">
+    <div class="container mt-3">
         <div class="d-flex">
             <div class="mr-auto p-2">
                 <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#add_productModal">
@@ -31,8 +31,9 @@
                 <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#add_multiple_productModal">
           Add Multiple Products
         </button>
+                    <a href="{% url 'export_products_csv' %}" class="btn btn-primary me-2" target="_blank">Export Products CSV</a>
             </div>
-            <div class="p-2" style="margin-left: 20rem;">
+            <div class="p-2" style="margin-left: 10rem;">
                     <form class="d-flex pl-5">
                         <div class="input-group">
                             <input class="form-control bg-light" type="search" placeholder="Search product" id="searchbar" aria-label="Search">
@@ -156,13 +157,18 @@
             <form action="{% url 'uploadproductfile' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <input type="file" id="myFile" name="files">
+                    <input type="file" id="csv_file" name="csv_file" accept=".csv" required>
+                    <p><b>(Upload products csv file here*)</b></p>
+                    <br>
+                    <input type="file" id="zip_file" name="zip_file" accept=".zip">
+                    <p>(Upload images zip here if needed)</p>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Upload</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </form>
+            
             
         </div>
     </div>

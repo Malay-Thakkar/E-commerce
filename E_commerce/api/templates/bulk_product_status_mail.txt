@@ -1,0 +1,12 @@
+Hi,
+
+Your product CSV has been processed.
+
+✅ Successfully Created: {created_count}
+♻️ Updated Existing: {updated_count}
+❌ Failed Entries: {failed_count}
+
+Please find the detailed row-by-row status in the attached report.
+
+Thanks,  
+Your Team

@@ -7,7 +7,16 @@ from django.contrib import messages
 import pandas as pd
 from api.models import ProductModel, CategoryModel, UploadProduct
 from api.serializers import ProductSerializers, CategorySerializers
-
+from .tasks import process_product_csv
+from  .utils import *
+import zipfile
+import os
+from django.conf import settings
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.contrib.admin.views.decorators import staff_member_required
+from django.http import HttpResponse
+import csv
 # from rest_framework.permissions import IsAuthenticated
 # from rest_framework.authentication import TokenAuthentication
 
@@ -38,57 +47,112 @@ class CategoryViewSet(viewsets.ModelViewSet):
         )
         return Response(filter_product_serializers.data)
 
-
-# Function view for uploading a CSV file containing product data
 @login_required(login_url="/signin")
 def uploadproductfile(request):
-    if request.user.is_staff:
-        if request.method == "POST":
-            file = request.FILES["files"]
-            obj = UploadProduct.objects.create(file=file)
-            # Call function to create database entries from the uploaded file
-            create_db(obj.file)
+    if request.user.is_staff and request.method == "POST":
+        uploaded_file = request.FILES.get("csv_file")
 
-            messages.success(request, "product added successfully!!!")
+        if not uploaded_file:
+            messages.error(request, "No file selected.")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
+        # Validate file extension
+        if not uploaded_file.name.endswith(".csv"):
+            messages.error(request, "Please upload a CSV file.")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
+        # Check CSV headers
+        try:
+            df = pd.read_csv(uploaded_file)
+        except Exception:
+            messages.error(request, "Unable to read the CSV file. Make sure it's properly formatted.")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
+        if not all(header in df.columns for header in expected_headers):
+            print("CSV headers are not properly formatted", df.columns, expected_headers)
+            messages.error(request, "CSV headers are not properly formatted.")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
+        # Save and pass to celery
+        obj = UploadProduct.objects.create(file=uploaded_file)
+        images_zip = request.FILES.get('zip_file')
+        
+        if images_zip:
+            # Ensure the 'uploads' directory exists in MEDIA_ROOT
+            upload_dir = os.path.join(settings.MEDIA_ROOT, "uploads")
+            if not os.path.exists(upload_dir):
+                os.makedirs(upload_dir)
+
+            zip_file_path = os.path.join(upload_dir, "product_images.zip")
+
+            # Save zip file to the server (temporarily)
+            with open(zip_file_path, 'wb') as f:
+                for chunk in images_zip.chunks():
+                    f.write(chunk)
+
+            # Extract zip file
+            extracted_images = extract_images_from_zip(zip_file_path)
+
+            # Store images using Django's default storage (either local or S3)
+            for image_path in extracted_images:
+                with open(image_path, 'rb') as image_file:
+                    file_name = os.path.basename(image_path)
+                    file = ContentFile(image_file.read(), name=file_name)
+                    # Save to storage (server or S3 based on settings)
+                    storage_path = default_storage.save(f"product_images/{file_name}", file)
+                    # Optionally delete the image after uploading
+                    os.remove(image_path)
+            
+            # Process CSV in background
+            process_product_csv.delay(obj.file.path, user_email=request.user.email)
+            messages.success(request, "CSV uploaded. Processing in background.")
             return redirect("/admin/products/")
         else:
-            return messages.error(request, "Invalid request method")
+            messages.error(request, "No images zip file selected.")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
     else:
+        messages.error(request, "Unauthorized or invalid request.")
         return redirect("/")
 
 
-# Function to create database entries from a CSV file
-def create_db(file_path):
-    # Define expected column headers in the CSV file
-    expected_headers = [
-        "Product_Name",
-        "Product_Stock",
-        "Product_Desc",
-        "Product_Img",
-        "Product_Price",
-        "Product_Unit",
-        "category_id",
-    ]
-    try:
-        df = pd.read_csv(file_path)
-        # Check if all expected headers are present in the CSV file
-        if not all(header in df.columns for header in expected_headers):
-            raise ValueError("CSV headers are not properly formatted")
+def extract_images_from_zip(zip_file_path):
+    """
+    Extract images from the uploaded zip file and return a list of image paths.
+    """
+    extracted_images = []
+    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+        extracted_folder = os.path.join(settings.MEDIA_ROOT, "uploads", "extracted_images")
+        os.makedirs(extracted_folder, exist_ok=True)
 
-        # Iterate through each row in the DataFrame
-        for index, row in df.iterrows():
-            try:
-                # create objects
-                ProductModel.objects.create(
-                    name=row["Product_Name"],
-                    price=row["Product_Price"],
-                    unit=row["Product_Unit"],
-                    stock=row["Product_Stock"],
-                    desc=row["Product_Desc"],
-                    img=row["Product_Img"],
-                    category=get_object_or_404(CategoryModel, pk=row["category_id"]),
-                )
-            except Exception as e:
-                print(f"Error processing row {index + 1}: {str(e)}")
-    except Exception as e:
-        print(f"Error reading CSV file: {str(e)}")
+        zip_ref.extractall(extracted_folder)
+        
+        # Iterate through the extracted files
+        for file_name in zip_ref.namelist():
+            # Full file path in the extracted folder
+            file_path = os.path.join(extracted_folder, file_name)
+
+            # Check if it's a file and not a directory
+            if os.path.isfile(file_path):
+                extracted_images.append(file_path)
+
+    return extracted_images
+
+@staff_member_required  # Ensure that only staff members can access this feature
+def export_products_csv(request):
+    # Query the products (or any model you're exporting)
+    products = ProductModel.objects.all()  # Modify this as needed (e.g., filter, paginate)
+    
+    # Prepare the HTTP response with CSV content type
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="products.csv"'
+    
+    writer = csv.writer(response)
+    
+    # Write the header row (this will match the columns you need)
+    writer.writerow(['ID', 'Name', 'Category', 'Price', 'Stock', 'Product_IMG'])
+    
+    # Write the product data rows
+    for product in products:
+        writer.writerow([product.product_id, product.name, product.category.category, product.price, product.stock, product.img if product.img else ''])
+    
+    return response
