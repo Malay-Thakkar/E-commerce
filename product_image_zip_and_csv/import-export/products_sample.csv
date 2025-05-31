@@ -1,0 +1,101 @@
+name,price,unit,stock,desc,img,category
+Product 1,482.09,box,72,New arrival with great features,sample.png,Garden & Outdoors
+Product 2,95.98,kg,64,New arrival with great features,sample.png,Fashion
+Product 3,305.63,pack,49,New arrival with great features,sample2.png,Beauty & Personal Care
+Product 4,376.0,bottle,24,New arrival with great features,sample2.png,Groceries
+Product 5,173.96,kg,13,New arrival with great features,sample1.png,Garden & Outdoors
+Product 6,337.28,kg,19,Top-rated by users,sample.png,Nestle
+Product 7,317.01,kg,35,Customer favorite item,sample1.png,Sports & Fitness
+Product 8,238.07,piece,53,Top-rated by users,sample1.png,Automotive
+Product 9,308.24,kg,42,New arrival with great features,sample2.png,Mobile Accessories
+Product 10,248.02,piece,59,High quality product for daily use,sample1.png,Garden & Outdoors
+Product 11,474.27,box,27,Bestseller in its category,sample1.png,Health & Wellness
+Product 12,318.27,piece,49,Bestseller in its category,sample1.png,Perfati
+Product 13,118.21,piece,34,Bestseller in its category,sample2.png,Other
+Product 14,214.08,box,89,High quality product for daily use,sample2.png,Health & Wellness
+Product 15,476.1,pack,48,New arrival with great features,sample.png,Electronics
+Product 16,230.81,bottle,25,New arrival with great features,sample1.png,Sports & Fitness
+Product 17,67.18,box,38,New arrival with great features,sample.png,Fashion
+Product 18,163.11,pack,72,High quality product for daily use,sample2.png,Sports & Fitness
+Product 19,483.8,piece,41,Limited stock available,sample1.png,Other
+Product 20,265.47,pack,40,Bestseller in its category,sample.png,Cadbury
+Product 21,287.68,box,14,Bestseller in its category,sample2.png,Electronics
+Product 22,383.04,box,86,Bestseller in its category,sample.png,Garden & Outdoors
+Product 23,328.15,piece,100,Recommended by experts,sample1.png,Garden & Outdoors
+Product 24,372.74,kg,43,Limited stock available,sample2.png,Musical Instruments
+Product 25,135.04,kg,10,Recommended by experts,sample2.png,Furniture
+Product 26,328.39,pack,26,New arrival with great features,sample.png,Kinder Joy
+Product 27,52.87,box,74,Bestseller in its category,sample.png,Other
+Product 28,166.07,pack,13,High quality product for daily use,sample2.png,Mobile Accessories
+Product 29,453.5,kg,57,Bestseller in its category,sample.png,Perfati
+Product 30,124.8,pack,82,Bestseller in its category,sample1.png,Appliances
+Product 31,295.87,piece,10,Top-rated by users,sample1.png,Home & Kitchen
+Product 32,261.28,piece,16,Customer favorite item,sample1.png,Books
+Product 33,127.16,pack,49,Limited stock available,sample2.png,Kinder Joy
+Product 34,391.48,pack,86,Limited stock available,sample2.png,Nestle
+Product 35,476.11,kg,93,Limited stock available,sample2.png,Toys & Games
+Product 36,91.77,bottle,73,High quality product for daily use,sample1.png,Furniture
+Product 37,415.55,piece,78,Recommended by experts,sample.png,Perfati
+Product 38,90.4,pack,66,New arrival with great features,sample.png,Kinder Joy
+Product 39,250.04,kg,95,Customer favorite item,sample2.png,Pet Supplies
+Product 40,388.23,kg,28,Limited stock available,sample1.png,Health & Wellness
+Product 41,449.33,box,78,Customer favorite item,sample.png,Footwear
+Product 42,414.33,kg,72,New arrival with great features,sample.png,Automotive
+Product 43,93.77,pack,13,Top-rated by users,sample2.png,Mobile Accessories
+Product 44,205.47,kg,74,Top-rated by users,sample.png,Pet Supplies
+Product 45,488.87,box,32,Bestseller in its category,sample1.png,Kinder Joy
+Product 46,289.98,kg,13,Top-rated by users,sample.png,Perfati
+Product 47,407.73,box,53,New arrival with great features,sample.png,Beauty & Personal Care
+Product 48,383.41,kg,100,Limited stock available,sample1.png,Watches
+Product 49,394.85,pack,36,Customer favorite item,sample1.png,Groceries
+Product 50,251.6,bottle,28,Customer favorite item,sample1.png,Beauty & Personal Care
+Product 51,182.73,bottle,78,Top-rated by users,sample2.png,Nestle
+Product 52,274.78,bottle,59,Bestseller in its category,sample2.png,Pet Supplies
+Product 53,102.19,pack,81,Limited stock available,sample1.png,Perfati
+Product 54,414.69,kg,40,High quality product for daily use,sample.png,Toys & Games
+Product 55,310.79,pack,40,Limited stock available,sample2.png,Home & Kitchen
+Product 56,95.41,box,99,New arrival with great features,sample.png,Kinder Joy
+Product 57,168.6,kg,28,Customer favorite item,sample.png,Sports & Fitness
+Product 58,446.32,kg,75,Recommended by experts,sample1.png,Cadbury
+Product 59,65.94,pack,12,New arrival with great features,sample1.png,Electronics
+Product 60,341.85,piece,66,Top-rated by users,sample1.png,Groceries
+Product 61,290.56,piece,77,Recommended by experts,sample1.png,Cadbury
+Product 62,189.87,pack,78,Recommended by experts,sample.png,Footwear
+Product 63,471.23,piece,11,Top-rated by users,sample2.png,Cadbury
+Product 64,294.39,kg,99,New arrival with great features,sample1.png,Books
+Product 65,467.08,piece,15,Limited stock available,sample2.png,Musical Instruments
+Product 66,145.84,box,95,Limited stock available,sample2.png,Fashion
+Product 67,253.64,bottle,28,Customer favorite item,sample.png,Kinder Joy
+Product 68,219.44,piece,57,Limited stock available,sample2.png,Home & Kitchen
+Product 69,142.22,box,49,High quality product for daily use,sample2.png,Electronics
+Product 70,84.32,kg,20,Customer favorite item,sample1.png,Home & Kitchen
+Product 71,371.79,pack,29,Bestseller in its category,sample.png,Sports & Fitness
+Product 72,202.29,bottle,38,New arrival with great features,sample2.png,Groceries
+Product 73,107.48,box,50,Customer favorite item,sample1.png,Beauty & Personal Care
+Product 74,168.05,piece,57,Recommended by experts,sample.png,Mobile Accessories
+Product 75,120.25,bottle,96,Recommended by experts,sample.png,Groceries
+Product 76,166.55,piece,64,Recommended by experts,sample.png,Watches
+Product 77,142.47,bottle,46,Recommended by experts,sample.png,Toys & Games
+Product 78,397.64,bottle,58,High quality product for daily use,sample1.png,Kinder Joy
+Product 79,221.48,pack,78,Top-rated by users,sample2.png,Home & Kitchen
+Product 80,261.72,piece,77,Recommended by experts,sample2.png,Automotive
+Product 81,392.26,kg,14,Top-rated by users,sample.png,Groceries
+Product 82,265.7,bottle,97,Customer favorite item,sample2.png,Home & Kitchen
+Product 83,206.79,pack,73,Recommended by experts,sample1.png,Stationery
+Product 84,353.53,bottle,71,New arrival with great features,sample1.png,Kinder Joy
+Product 85,284.38,kg,44,Recommended by experts,sample2.png,Appliances
+Product 86,343.4,box,49,Customer favorite item,sample2.png,Other
+Product 87,417.05,box,40,High quality product for daily use,sample2.png,Fashion
+Product 88,474.94,kg,21,Recommended by experts,sample.png,Automotive
+Product 89,278.89,pack,53,Top-rated by users,sample2.png,Cadbury
+Product 90,86.51,piece,20,New arrival with great features,sample1.png,Other
+Product 91,459.96,box,15,Top-rated by users,sample.png,Garden & Outdoors
+Product 92,403.96,pack,99,Bestseller in its category,sample1.png,Kinder Joy
+Product 93,348.97,kg,100,Recommended by experts,sample.png,Garden & Outdoors
+Product 94,302.79,kg,88,Limited stock available,sample1.png,Toys & Games
+Product 95,225.27,box,65,Recommended by experts,sample.png,Fashion
+Product 96,356.93,kg,55,Customer favorite item,sample1.png,Furniture
+Product 97,202.1,box,92,New arrival with great features,sample2.png,Musical Instruments
+Product 98,187.07,box,24,Limited stock available,sample.png,Books
+Product 99,170.64,box,18,High quality product for daily use,sample1.png,Beauty & Personal Care
+Product 100,289.53,bottle,62,New arrival with great features,sample2.png,Garden & Outdoors
