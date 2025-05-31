@@ -1,112 +1,190 @@
-<!doctype html>
-<html lang="en">
+{% extends "base.html" %}
+{% load static %}
+{% load socialaccount %}
+{% block body %}
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
-    <meta name="generator" content="Hugo 0.84.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
 
-    <title>Signup</title>
+    }
 
-    <style>
-        .gradient-custom {
-            /* fallback for old browsers */
-            background: #6a11cb;
-            /* Chrome 10-25, Safari 5.1-6 */
-            background: -webkit-linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1));
-            /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-            background: linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1))
+    .container {
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 30px;
+        background-color: #161925;
+        color: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
+
+    .form-control_login {
+        margin-bottom: 20px;
+        padding: 10px;
+        font-size: 16px;
+        width: 100%;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .btn-submit {
+        background-color: #007bff;
+        color: white;
+        padding: 12px 25px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        width: 100%;
+        cursor: pointer;
+    }
+
+    .btn-submit:hover {
+        background-color: #0056b3;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .login-options {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+
+    .social-login-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        color: white;
+        font-size: 14px;
+    }
+
+    .github-btn {
+        background-color: #181717;
+    }
+
+    .google-btn {
+        background-color: #4285F4;
+    }
+
+    .social-icon {
+        width: 24px;
+        height: 24px;
+        margin-right: 10px;
+    }
+
+    .checkbox-container {
+        display: flex;
+        align-items: center;
+        margin: 15px 0;
+    }
+
+    .checkbox-container input {
+        margin-right: 10px;
+    }
+
+    @media only screen and (max-width: 600px) {
+        .container {
+            margin: 20px;
+            padding: 20px;
         }
-    </style>
-</head>
 
-<body class="vh-100 gradient-custom">
+        h1 {
+            font-size: 24px;
+        }
 
-    <section class="vh-100 gradient-custom">
-        <form method="post" {% if messages.tags != "successfuly" %}action="" {% else %} action="/signin" {% endif %} enctype="multipart/form-data">
-            {% if messages %}
-            <div class="alert alert-primary" role="alert" id="message-container">
-                {% for message in messages %}
-                    {{ message }}
-                {% endfor %}
-            </div>
-            <script>
-                document.addEventListener("DOMContentLoaded", function() {
-                    var messageContainer = document.getElementById('message-container');
-                    setTimeout(function() {
-                        messageContainer.style.opacity = 0; 
-                        setTimeout(function() {
-                            messageContainer.style.display = 'none';
-                        }, 500);
-                    }, 3000);
-                });
-            </script>
-        {% endif %}
-            {% csrf_token %}
-            <div class="container py-5 h-100">
-                <div class="row d-flex justify-content-center align-items-center h-100">
-                    <div class="col-12 col-md-8 col-lg-6 col-xl-5">
-                        <div class="card bg-dark text-white" style="border-radius: 1rem;">
-                            <div class="card-body p-5 text-center">
-                                <div class="mb-md-5 mt-md-4">
+        .btn-submit {
+            font-size: 14px;
+        }
+    }
+</style>
 
-                                    <h2 class="fw-bold mb-2 text-uppercase">Signup</h2>
-                                    <p class="text-white-50 mb-5">Please Register your self!</p>
+{% if messages %}
+<div class="alert alert-primary" role="alert" id="messages-container">
+    {% for message in messages %}
+        {{ message }}
+    {% endfor %}
+</div>
+<script>
+    setTimeout(function () {
+        var messagesContainer = document.getElementById('messages-container');
+        if (messagesContainer) {
+            messagesContainer.style.display = 'none';
+        }
+    }, 3000);
+</script>
+{% endif %}
 
-                                    <div class="form-group">
-                                        <label class="form-label" >First name</label>
-                                        <input type="text" class="form-control form-control-lg" id="exampleInputEmail1" aria-describedby="emailHelp"
-                                            placeholder="Enter First name" name="first_name" required>
-                                    </div>
-                         
-                                    <!-- Last Name input field -->
-                                    <div class="form-group">
-                                        <label class="form-label" >Last name</label>
-                                        <input type="text" name="last_name" class="form-control form-control-lg" id="exampleInputEmail1"
-                                            aria-describedby="emailHelp" placeholder="Enter Last name" required>
-                                    </div>
+<div class="container">
+    <h1>Sign Up</h1>
 
-                                    <div class="form-outline form-white mb-2">
-                                        <label class="form-label" for="typeEmailX">Username</label>
-                                        <input type="name" id="typeEmailX" placeholder="username" name="username" required class="form-control form-control-lg" />
-                                    </div>
-        
-                                    <div class="form-outline form-white mb-4">
-                                        <label class="form-label" for="typePasswordX">Password</label>
-                                        <input type="password" id="typePasswordX" placeholder="password" name="password" required class="form-control form-control-lg" />
-                                    </div>
+    <form method="post" enctype="multipart/form-data" action="{% if messages.tags != 'successfuly' %}""{% else %}/signin{% endif %}">
+        {% csrf_token %}
 
-                                    <div class="form-outline form-white mb-2">
-                                        <label class="form-label" for="typeEmailX">Phone NO</label>
-                                        <input type="name" id="typeEmailX" placeholder="1234567890" name="phone" required class="form-control form-control-lg" />
-                                    </div>
-                                    <div class="form-outline form-white mb-2">
-                                        <label class="form-label" for="typeEmailX">Address</label>
-                                        <input type="name" id="typeEmailX" placeholder="02, Vraj villa" name="Address" required class="form-control form-control-lg" />
-                                    </div>
-                                    <div class="form-outline form-white mb-2">
-                                        <label class="form-label" for="typeEmailX">Email</label>
-                                        <input type="email" id="typeEmailX" placeholder="xyz@email.com" name="email" required class="form-control form-control-lg" />
-                                    </div>
-                                    <div class="form-outline form-white m-4 align-self-start d-flex">
-                                        <input type="checkbox" class="mx-4" id="vehicle1" required name="tandc" value="Agree">
-                                        <a href="/terms-and-Conditions" class="form-label">Terms and Conditions</a>
-                                    </div>
-    
-                                    <button class="btn btn-outline-light btn-lg px-5" name="signup" type="submit">Signup</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </form>
-    </section>
-</body>
-</html>
+        <label for="first_name">First Name</label>
+        <input type="text" class="form-control_login" name="first_name" placeholder="Enter first name" required>
+
+        <label for="last_name">Last Name</label>
+        <input type="text" class="form-control_login" name="last_name" placeholder="Enter last name" required>
+
+        <label for="username">Username</label>
+        <input type="text" class="form-control_login" name="username" placeholder="Enter username" required>
+
+        <label for="password">Password</label>
+        <input type="password" class="form-control_login" name="password" placeholder="Enter password" required>
+
+        <label for="phone">Phone No</label>
+        <input type="text" class="form-control_login" name="phone" placeholder="Enter phone number" required>
+
+        <label for="address">Address</label>
+        <input type="text" class="form-control_login" name="Address" placeholder="Enter address" required>
+
+        <label for="email">Email</label>
+        <input type="email" class="form-control_login" name="email" placeholder="Enter email" required>
+
+        <div class="checkbox-container">
+            <input type="checkbox" name="tandc" required> 
+            <a href="/terms-and-Conditions" target="_blank">I agree to the Terms and Conditions</a>
+        </div>
+
+        <button type="submit" name="signup" class="btn-submit">Sign Up</button>
+
+        <p class="text-center mt-3">Already have an account? <a href="/signin">Login</a></p>
+    </form>
+
+    <hr>
+    <h3 class="text-center">Or signup with</h3>
+
+    <div class="login-options">
+        <a href="{% provider_login_url 'github' %}" class="social-login-btn github-btn">
+            <img src="{% static 'img/github.png' %}" alt="GitHub" class="social-icon"> GitHub
+        </a>
+        <a href="{% provider_login_url 'google' %}" class="social-login-btn google-btn">
+            <img src="{% static 'img/google.png' %}" alt="Google" class="social-icon"> Google
+        </a>
+    </div>
+</div>
+
+{% endblock %}

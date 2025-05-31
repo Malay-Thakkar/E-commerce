@@ -11,3 +11,9 @@ django-elasticsearch-dsl==7.2.2
 celery
 django-celery-beat
 redis
+django-jet-reboot
+google-api-python-client==1.4.1
+django-import-export
+django-allauth>=0.60.0,<0.65
+PyJWT>=2.0.0
+cryptography>=3.4.7

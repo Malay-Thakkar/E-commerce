@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model
@@ -253,7 +254,7 @@ def changepasswd(request):
 
 # for forgate passwoard
 def forgotpasswd(request):
-    pass
+    return HttpResponse("forgot password page comming soon you can update password in profile page for forget password!!! you can contact us using contact us page.")
 
 
 # for permenent delete account/user
