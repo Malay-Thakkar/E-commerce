@@ -1,0 +1,54 @@
+version: "3.1"
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true
+
+intents:
+  - greet
+  - goodbye
+  - who_are_you
+  - search_product
+  - add_to_cart
+  - remove_from_cart  
+  - update_cart_quantity 
+  - view_cart           
+  - add_to_wishlist
+  - view_past_orders
+  - ask_complex_question
+
+entities:
+  - product_name
+  - quantity
+  - product_name_secondary
+
+slots:
+  product_name:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: product_name
+
+responses:
+  utter_greet:
+    - text: "Hello! I'm PSAssist. How can I help you today?"
+  utter_goodbye:
+    - text: "Goodbye! Happy shopping."
+  utter_ask_product_name:
+    - text: "What product are you looking for?"
+  utter_iamabot:
+    - text: "I am a bot, powered by Rasa and integrated into the PSThakkar E-commerce platform."
+
+actions:
+  - action_add_to_cart
+  - action_view_past_orders
+  - action_trigger_research_agent
+  - action_search_product
+  - action_add_to_wishlist
+  - action_remove_from_cart
+  - action_update_cart_quantity
+  - action_view_cart
+  - utter_greet
+  - utter_goodbye
+  - utter_ask_product_name
+  - utter_iamabot
+

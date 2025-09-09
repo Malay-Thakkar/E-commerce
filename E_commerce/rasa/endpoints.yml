@@ -1,0 +1,2 @@
+action_endpoint:
+  url: "http://ps-thakkar_action_server:5055/webhook"

@@ -1,0 +1,26 @@
+# The config recipe.
+# https://rasa.com/docs/rasa/model-configuration/
+recipe: default.v1
+language: en
+
+pipeline:
+- name: WhitespaceTokenizer
+- name: RegexFeaturizer
+- name: LexicalSyntacticFeaturizer
+- name: CountVectorsFeaturizer
+- name: CountVectorsFeaturizer
+  analyzer: char_wb
+  min_ngram: 1
+  max_ngram: 4
+- name: DIETClassifier
+  epochs: 100
+- name: EntitySynonymMapper
+- name: ResponseSelector
+  epochs: 100
+
+# The policies configuration.
+# https://rasa.com/docs/rasa/policies/
+policies:
+# Add this RulePolicy to enable the rules.yml file.
+- name: RulePolicy
+assistant_id: 20250906-175012-obvious-bibliography

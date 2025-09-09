@@ -1,0 +1,83 @@
+version: "3.1"
+nlu:
+- intent: greet
+  examples: |
+    - hi
+    - hello
+    - hey there
+    - good morning
+    - good afternoon
+    - good evening
+
+- intent: goodbye
+  examples: |
+    - bye
+    - goodbye
+    - good night
+    - see you later
+
+- intent: who_are_you
+  examples: |
+    - who are you?
+
+- intent: search_product
+  examples: |
+    - search [product_name](product_name)
+    - search for [product_name](product_name)
+    - search for product [product_name](product_name)
+    - do you have any [product_name](product_name)?
+    - I'm looking for a [product_name](product_name)
+    - find [product_name](product_name)
+    - find me a [product_name](product_name)
+    - show me the [product_name](product_name)
+    - I'm looking for a [product_name](product_name)
+    - can you find [product_name](product_name)
+
+- intent: add_to_cart
+  examples: |
+    - add this to cart
+    - add one [product_name](product_name)
+    - add [product_name](product_name) to cart
+    - add [product_name](product_name) to my cart
+    - add the [product_name](product_name) to my cart
+    - put [2](quantity) [product_name](product_name) in the basket
+    - put [Product 13](product_name) in my cart
+
+- intent: remove_from_cart
+  examples: |
+    - remove the [laptop](product_name) from my cart
+    - delete [Product 12](product_name) from cart
+    - get rid of the [t-shirt](product_name)
+
+- intent: update_cart_quantity
+  examples: |
+    - update quantity of [laptops](product_name) to [3](quantity)
+    - change [Product 12](product_name) to [5](quantity)
+    - I need [2](quantity) of the [t-shirts](product_name)
+
+- intent: view_cart
+  examples: |
+    - show my cart
+    - what's in my shopping cart?
+    - view my basket
+    - summarize my cart
+    
+- intent: add_to_wishlist
+  examples: |
+    - add [smart watch](product_name) to my wishlist
+    - save the [leather jacket](product_name) for later
+
+- intent: view_past_orders
+  examples: |
+    - show me my past orders
+    - where can I see my order history?
+    - view my orders
+    - check my order status
+    - check my previous purchases
+    - what did I order last time
+
+- intent: ask_complex_question
+  examples: |
+    - which is better, the [red shirt](product_name) or the [blue one](product_name_secondary)?
+    - find me a [laptop](product_name) with good reviews for gaming
+    - compare the [product_name](product_name) and the [Dell XPS](product_name_secondary)

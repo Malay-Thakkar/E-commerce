@@ -1,0 +1,222 @@
+<!-- PSAssist Chatbot UI Component -->
+{% load static %}
+
+<!-- Font Awesome CDN for Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+<style>
+    #psassist-chat-widget {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+
+    #psassist-chat-container {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease-in-out;
+        border-radius: 12px;
+        overflow: hidden;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .psassist-message.user {
+        text-align: right;
+    }
+
+    .psassist-message.user .psassist-message-content {
+        background-color: #2563eb;
+        color: white;
+        border-top-right-radius: 0;
+    }
+
+    .psassist-message.bot .psassist-message-content {
+        background-color: #f3f4f6;
+        color: #1f2937;
+        border-top-left-radius: 0;
+    }
+
+    .psassist-message-content {
+        padding: 0.75rem 1rem;
+        border-radius: 18px;
+        display: inline-block;
+        max-width: 80%;
+    }
+
+    #psassist-chat-box {
+        background-color: #fff;
+    }
+
+    /* Custom Scrollbar */
+    #psassist-chat-box::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    #psassist-chat-box::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+    }
+
+    #psassist-toggle-btn {
+        background: #181c24ff;
+        width: 110px;
+        height: 110px;
+        border-radius: 30%;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+
+    .psassist-logo {
+        height: 32px;
+        width: 32px;
+        margin-right: 10px;
+        border-radius: 50%;
+    }
+
+    .psassist-header-title {
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+        font-size: 1rem;
+        color: #374151;
+    }
+
+    #psassist-close-btn {
+        font-size: 1.2rem;
+        color: #6b7280;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    #psassist-close-btn:hover {
+        color: #111827;
+    }
+    .hidden {
+        display: none;
+    }
+</style>
+
+<div id="psassist-chat-widget">
+    <!-- Chat Popup -->
+    <div id="psassist-chat-container" class="hidden w-80 sm:w-96 h-[60vh] flex flex-col bg-white border" style="box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); margin-bottom: 105px; margin-right: 25px;">
+        {% csrf_token %}
+        <!-- Header -->
+        <div class="flex items-center justify-between p-3 border-b bg-gray-50">
+            <div class="psassist-header-title">
+                <img src="{% static 'img/chatbot.png' %}" alt="PSAssist Logo" class="psassist-logo">
+                PSAssist
+            </div>
+            <button id="psassist-close-btn" aria-label="Close Chat">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <!-- Messages -->
+        <div id="psassist-chat-box" class="flex-1 p-4 overflow-y-auto space-y-2">
+            <div class="psassist-message bot">
+                <div class="psassist-message-content">
+                    Hello! I'm PSAssist. How can I help you shop today?
+                </div>
+            </div>
+        </div>
+        <!-- Input -->
+        <div class="p-3 border-t bg-gray-50">
+            <div class="flex">
+                <input type="text" id="psassist-chat-input" placeholder="Ask something..." class="flex-1 px-3 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="psassist-send-btn" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="background-color: #181c24ff;">
+                    Send
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toggle Button -->
+     <div style="position: absolute; bottom: 0; right: 0; margin: 20px;">
+        <button id="psassist-toggle-btn">
+            <img src="{% static 'img/chatbot.png' %}" alt="PSAssist Logo"> 
+        </button>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const chatContainer = document.getElementById('psassist-chat-container');
+    const toggleBtn = document.getElementById('psassist-toggle-btn');
+    const closeBtn = document.getElementById('psassist-close-btn');
+    const sendBtn = document.getElementById('psassist-send-btn');
+    const chatInput = document.getElementById('psassist-chat-input');
+    const chatBox = document.getElementById('psassist-chat-box');
+
+    const getCsrfToken = () => {
+        const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        return tokenInput ? tokenInput.value : '';
+    };
+
+    const toggleChat = () => {
+        chatContainer.classList.toggle('hidden');
+        toggleBtn.classList.toggle('hidden');
+    };
+
+    const addMessage = (text, sender) => {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `psassist-message ${sender}`;
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'psassist-message-content';
+        contentDiv.textContent = text;
+
+        msgDiv.appendChild(contentDiv);
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    };
+
+    const sendMessage = async () => {
+        const message = chatInput.value.trim();
+        if (!message) return;
+
+        addMessage(message, 'user');
+        chatInput.value = '';
+
+        try {
+            const response = await fetch('/api/psassist/chat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken(),
+                },
+                body: JSON.stringify({ message: message })
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+            const botData = await response.json();
+            botData.forEach(botReply => {
+                if (botReply.text) {
+                    addMessage(botReply.text, 'bot');
+                }
+            });
+        } catch (error) {
+            console.error('Error sending message:', error);
+            addMessage('Sorry, something went wrong. Please try again.', 'bot');
+        }
+    };
+    toggleBtn.addEventListener('click', () => {
+        console.log("Toggle button clicked");
+        toggleChat();
+    });
+    closeBtn.addEventListener('click', () => {
+        console.log("Close button clicked");
+        toggleChat();
+    });
+   
+    sendBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+});
+</script>

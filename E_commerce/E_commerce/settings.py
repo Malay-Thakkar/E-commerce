@@ -22,14 +22,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = (os.getenv("SECRET_KEY"),)
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = (os.getenv("DEBUG"),)
+# This is the correct configuration
+SECRET_KEY = os.getenv("SECRET_KEY")
+DEBUG = str(os.getenv("DEBUG")) == 'True'
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "ps-thakkar_web",
+    "0.0.0.0",
+    "[::1]",
+    "*"
+]
 
 
-# Application definition
 
 INSTALLED_APPS = [
     # "jazzmin",
@@ -50,6 +56,8 @@ INSTALLED_APPS = [
     "api",
     "payment",
     "django_celery_beat",
+    'psassist',
+    'rest_framework_simplejwt',
 
 
     # Third-party apps
@@ -167,7 +175,12 @@ REST_FRAMEWORK = {
     # or allow read-only access for unauthenticated users.
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"
-    ]
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # You might also want to keep session auth for browsing the API
+        'rest_framework.authentication.SessionAuthentication',
+    )
 }
 
 INTERNAL_IPS = [

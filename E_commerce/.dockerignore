@@ -1,0 +1,17 @@
+Ignore Python virtual environment
+venv/
+
+Ignore Python bytecode and cache
+pycache/
+*.pyc
+*.pyo
+*.pyd
+
+Ignore Git files
+.git/
+.gitignore
+
+Ignore Rasa cache and models from the main build context
+rasa/models/
+rasa/.rasa/
+.bash_history

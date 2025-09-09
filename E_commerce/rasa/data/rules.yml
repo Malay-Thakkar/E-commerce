@@ -1,0 +1,58 @@
+version: "3.1"
+
+rules:
+- rule: Greet the user
+  steps:
+  - intent: greet
+  - action: utter_greet
+
+- rule: Say goodbye
+  steps:
+  - intent: goodbye
+  - action: utter_goodbye
+
+- rule: who are you
+  steps:
+  - intent: who_are_you
+  - action: utter_iamabot
+
+- rule: Handle complex questions
+  steps:
+  - intent: ask_complex_question
+  - action: action_trigger_research_agent
+
+- rule: Handle add to cart
+  steps:
+  - intent: add_to_cart
+  - action: action_add_to_cart
+
+- rule: Handle add to wishlist
+  steps:
+  - intent: add_to_wishlist
+  - action: action_add_to_wishlist
+
+- rule: Handle remove from cart
+  steps:
+  - intent: remove_from_cart
+  - action: action_remove_from_cart
+
+- rule: Handle update cart quantity
+  steps:
+  - intent: update_cart_quantity
+  - action: action_update_cart_quantity
+
+- rule: Handle view cart
+  steps:
+  - intent: view_cart
+  - action: action_view_cart
+
+- rule: Handle view past orders
+  steps:
+  - intent: view_past_orders
+  - action: action_view_past_orders
+
+- rule: Handle search product
+  steps:
+  - intent: search_product
+  - action: action_search_product
+

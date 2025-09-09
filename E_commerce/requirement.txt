@@ -6,3 +6,4 @@ python-dotenv
 requests
 pandas
 django-debug-toolbar
+djangorestframework-simplejwt

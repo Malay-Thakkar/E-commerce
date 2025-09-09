@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: ps-thakkar-app:latest
     container_name: ${COMPOSE_PROJECT_NAME}_web
     ports:
       - "8000:8000"
@@ -18,10 +19,6 @@ services:
         condition: service_started
     env_file:
       - .env
-    environment:
-      DJANGO_SECRET_KEY: ${SECRET_KEY}
-      DJANGO_DEBUG: ${DEBUG}
-      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
     entrypoint: ["/E-commerce/entrypoint.sh", "web"]
     networks:
       - default
@@ -56,9 +53,7 @@ services:
       - default
 
   celery:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ps-thakkar-app:latest
     container_name: ${COMPOSE_PROJECT_NAME}_celery
     depends_on:
       db:
@@ -69,19 +64,13 @@ services:
       - .:/E-commerce
     env_file:
       - .env
-    environment:
-      DJANGO_SECRET_KEY: ${SECRET_KEY}
-      DJANGO_DEBUG: ${DEBUG}
-      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
     command: celery -A E_commerce worker --loglevel=info
     entrypoint: ["/E-commerce/entrypoint.sh", "celery"]
     networks:
       - default
 
   celery-beat:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ps-thakkar-app:latest
     container_name: ${COMPOSE_PROJECT_NAME}_celery_beat
     depends_on:
       db:
@@ -92,15 +81,10 @@ services:
       - .:/E-commerce
     env_file:
       - .env
-    environment:
-      DJANGO_SECRET_KEY: ${SECRET_KEY}
-      DJANGO_DEBUG: ${DEBUG}
-      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
     command: celery -A E_commerce beat --loglevel=info
     entrypoint: ["/E-commerce/entrypoint.sh", "celery-beat"]
     networks:
       - default
-
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.13
@@ -123,8 +107,53 @@ services:
       timeout: 5s
       retries: 5
 
+  # --- NEW CHATBOT SERVICES ---
+
+  rasa:
+    image: rasa/rasa:3.6.10-full
+    container_name: ${COMPOSE_PROJECT_NAME}_rasa
+    ports:
+      - "5005:5005"
+    volumes:
+      - ./rasa:/app/
+    # CORRECTED COMMAND: Added the '--model' flag
+    command: run --enable-api --cors "*" --model /app/models
+    networks:
+      - default
+    depends_on:
+      - action_server
+
+  action_server:
+    build:
+      context: ./rasa/actions
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME}_action_server
+    ports:
+      - "5055:5055"
+    volumes:
+      - ./rasa/actions:/app/actions
+    networks:
+      - default
+    depends_on:
+      - web
+      - ollama
+
+  ollama:
+    image: ollama/ollama
+    container_name: ${COMPOSE_PROJECT_NAME}_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - default
+
 volumes:
   postgres_data:
+  ollama_data:
 
 networks:
   default:
+
+    # docker-compose exec ollama ollama pull phi3:mini
+    # docker-compose exec rasa rasa train

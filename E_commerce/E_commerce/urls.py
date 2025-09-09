@@ -25,6 +25,7 @@ urlpatterns = [
     path("", include("customer.urls")),
     path("", include("cart.urls")),
     path("", include("payment.urls")),
+    path("api/psassist/", include("psassist.urls")),
     path("api/", include("api.urls")),
     path("admin/", include("owner.urls")),
     path("__debug__/", include("debug_toolbar.urls")),

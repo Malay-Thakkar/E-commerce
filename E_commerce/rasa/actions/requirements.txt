@@ -1,0 +1,6 @@
+rasa-sdk==3.6.2
+requests
+langchain==0.1.20
+langchain-community==0.0.38
+langgraph==0.0.48
+djangorestframework-simplejwt
