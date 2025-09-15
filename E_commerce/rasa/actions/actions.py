@@ -1,110 +1,68 @@
 import requests
 from typing import Any, Text, Dict, List, TypedDict
-import logging
 
 # Rasa Imports
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet
 
-# LangChain / LangGraph Imports
-from langgraph.prebuilt.tool_executor import ToolExecutor
-from langchain_community.chat_models import ChatOllama
-from langchain_core.tools import tool
-from langgraph.graph import StateGraph, END
-from langchain_core.messages import HumanMessage, ToolMessage
-
 # --- CONFIGURATION ---
-API_BASE_URL = "http://172.18.0.6:8000/api/"
-logger = logging.getLogger(__name__)
+API_BASE_URL = "http://web:8000/api/"
 
 # --- HELPER FUNCTIONS ---
 def get_auth_headers(tracker: Tracker) -> Dict[Text, Any] | None:
-    """Extract JWT token from tracker metadata."""
+    """Extracts JWT token from tracker and prepares auth headers."""
     token = tracker.latest_message.get("metadata", {}).get("token")
     if not token:
-        logger.warning("Auth token not found in Rasa tracker.")
+        print("ACTION_SERVER_LOG: WARNING: Auth token not found in Rasa tracker.")
         return None
     return {"Authorization": f"Bearer {token}"}
 
 def find_product_id(product_name: str, headers: dict) -> int | None:
-    """Helper to find a product's ID from its name via API search."""
-    search_url = API_BASE_URL + "product/"
+    """Helper to find a product's ID from its name via Elasticsearch API search."""
+    search_url = f"{API_BASE_URL}product/search/"
     try:
         response = requests.get(search_url, params={"search": product_name}, headers=headers)
         response.raise_for_status()
-        products = response.json()
-        if products:
-            return products[0].get('product_id')
+        result = response.json()
+        
+        if result.get('status') == 'success' and result.get('products'):
+            # Return the first (most relevant) product's ID
+            return result['products'][0].get('product_id')
     except requests.exceptions.RequestException as e:
-        print(f"Error finding product '{product_name}': {e}")
+        print(f"ACTION_SERVER_LOG: Error finding product '{product_name}': {e}")
     return None
 
-# --- LANGGRAPH AGENT & TOOLS (For Complex Queries) ---
-@tool
-def search_product_by_name_agent(product_name: str) -> Dict[str, Any]:
-    """A tool for the AI agent to search for a product by its name and get its details."""
-    print(f"--- AGENT TOOL: Searching for product: {product_name} ---")
-    # This is a placeholder and could be expanded to call the real API
-    # and provide much more detailed information for the LLM to reason about.
-    if "macbook" in product_name.lower():
-        return {"id": "prod_123", "name": "Macbook Pro", "price": 1999.99, "category": "Laptops"}
+def handle_api_error(dispatcher: CollectingDispatcher, action_name: str, error: requests.exceptions.RequestException):
+    """A centralized function to handle API errors gracefully."""
+    print(f"--- API Call Failed: {action_name} ---")
+    if error.response is not None:
+        print(f"URL: {error.request.url}")
+        print(f"Status Code: {error.response.status_code}")
+        print(f"Response Body: {error.response.text}")
     else:
-        return {"error": "Product not found."}
+        print(f"Error: Could not connect to the server. Is the 'web' service running and healthy?")
+    print(f"Full Exception: {error}")
+    
+    # Return user-friendly error message
+    if hasattr(error, 'response') and error.response is not None:
+        if error.response.status_code == 401:
+            dispatcher.utter_message(text="Please log in to use this feature.")
+        elif error.response.status_code == 404:
+            dispatcher.utter_message(text="The requested item was not found.")
+        elif error.response.status_code == 503:
+            dispatcher.utter_message(text="Search service is temporarily unavailable. Please try again later.")
+        else:
+            dispatcher.utter_message(text="Sorry, something went wrong. Please try again later.")
+    else:
+        dispatcher.utter_message(text="Sorry, I'm having connection issues. Please try again in a moment.")
 
-class AgentState(TypedDict):
-    messages: List[Any]
-
-llm = ChatOllama(model="phi3:mini", base_url="http://ollama:11434")
-tools = [search_product_by_name_agent]
-tool_executor = ToolExecutor(tools)
-
-def should_continue(state: AgentState):
-    if not state['messages'][-1].tool_calls:
-        return "end"
-    return "continue"
-
-def call_model(state: AgentState):
-    response = llm.invoke(state['messages'])
-    return {"messages": state['messages'] + [response]}
-
-def call_tool(state: AgentState):
-    last_message = state['messages'][-1]
-    tool_outputs = []
-    for tool_call in last_message.tool_calls:
-        tool_output = tool_executor.invoke(tool_call)
-        tool_outputs.append(ToolMessage(content=str(tool_output), tool_call_id=tool_call['id']))
-    return {"messages": state['messages'] + tool_outputs}
-
-workflow = StateGraph(AgentState)
-workflow.add_node("agent", call_model)
-workflow.add_node("action", call_tool)
-workflow.set_entry_point("agent")
-workflow.add_conditional_edges("agent", should_continue, {"continue": "action", "end": END})
-workflow.add_edge('action', 'agent')
-agent_graph = workflow.compile()
-
-# --- RASA ACTIONS ---
-
-class ActionTriggerResearchAgent(Action):
-    def name(self) -> Text: return "action_trigger_research_agent"
-    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict) -> List[Dict]:
-        user_query = tracker.latest_message['text']
-        dispatcher.utter_message(text="Let me research that for you...")
-        try:
-            inputs = {"messages": [HumanMessage(content=user_query)]}
-            final_state = agent_graph.invoke(inputs)
-            llm_response = final_state['messages'][-1].content
-            dispatcher.utter_message(text=llm_response)
-        except Exception as e:
-            print(f"Error running LangGraph agent: {e}")
-            dispatcher.utter_message(text="Sorry, I ran into an issue processing your complex request.")
-        return []
+# --- CORE CHATBOT ACTIONS ---
 
 class ActionSearchProduct(Action):
-    def name(self) -> Text:
+    def name(self) -> Text: 
         return "action_search_product"
-
+    
     def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict) -> List[Dict]:
         headers = get_auth_headers(tracker)
         product_name = next(tracker.get_latest_entity_values("product_name"), None)
@@ -113,181 +71,283 @@ class ActionSearchProduct(Action):
             dispatcher.utter_message(text="What product are you looking for?")
             return []
         
-        search_url = f"{API_BASE_URL}product/"
-        
+        # Use the new Elasticsearch-powered search API
+        search_url = f"{API_BASE_URL}product/search/"
         try:
-            response = requests.get(
-                search_url, 
-                params={"search": product_name}, 
-                headers=headers
-            )
+            response = requests.get(search_url, params={"search": product_name}, headers=headers)
             response.raise_for_status()
-            products = response.json()
+            result = response.json()
             
-            if products:
-                message = f"I found these products matching '{product_name}':\n"
-                for p in products:
-                    message += f"- {p.get('name')} (${p.get('price')})\n"
-                dispatcher.utter_message(text=message)
+            if result.get('status') == 'success' and result.get('products'):
+                products = result['products']
+                total_hits = result.get('total_hits', len(products))
+                
+                if len(products) == 1:
+                    # Single product found
+                    p = products[0]
+                    message = f"I found this product: **{p.get('name')}**\n"
+                    message += f"💰 Price: ₹{p.get('price')}\n"
+                    if p.get('unit'):
+                        message += f"📦 Unit: {p.get('unit')}\n"
+                    if p.get('stock') is not None:
+                        stock_status = "✅ In Stock" if p.get('stock') > 0 else "❌ Out of Stock"
+                        message += f"📊 Status: {stock_status}\n"
+                    if p.get('category') and p.get('category').get('name'):
+                        message += f"🏷️ Category: {p.get('category').get('name')}\n"
+                    
+                    dispatcher.utter_message(text=message)
+                    
+                elif len(products) <= 5:
+                    # Multiple products found (up to 5)
+                    message = f"I found {len(products)} products matching '{product_name}':\n\n"
+                    for i, p in enumerate(products, 1):
+                        message += f"**{i}. {p.get('name')}**\n"
+                        message += f"   💰 ₹{p.get('price')}"
+                        if p.get('unit'):
+                            message += f" per {p.get('unit')}"
+                        message += "\n"
+                        if p.get('category') and p.get('category').get('name'):
+                            message += f"   🏷️ {p.get('category').get('name')}\n"
+                        message += "\n"
+                    
+                    if total_hits > len(products):
+                        message += f"... and {total_hits - len(products)} more results"
+                    
+                    dispatcher.utter_message(text=message)
+                else:
+                    # Many products found, show summary
+                    message = f"I found {total_hits} products matching '{product_name}'. Here are the top 5:\n\n"
+                    for i, p in enumerate(products[:5], 1):
+                        message += f"**{i}. {p.get('name')}** - ₹{p.get('price')}\n"
+                    
+                    message += f"\n... and {total_hits - 5} more results. Try being more specific to narrow down the search."
+                    dispatcher.utter_message(text=message)
+                
+                return [SlotSet("product_name", product_name)]
+                
             else:
-                dispatcher.utter_message(
-                    text=f"Sorry, I couldn't find any products matching '{product_name}'."
-                )
+                error_msg = result.get('message', f"Sorry, I couldn't find any products matching '{product_name}'.")
+                dispatcher.utter_message(text=error_msg)
                 
         except requests.exceptions.RequestException as e:
-            logger.error(f"API Error: {e}")
-            dispatcher.utter_message(
-                text="Sorry, I'm having trouble searching our inventory right now."
-            )
-        
-        return [SlotSet("product_name", product_name)]
+            handle_api_error(dispatcher, self.name(), e)
+        return []
 
 class ActionAddToCart(Action):
-    def name(self) -> Text: return "action_add_to_cart"
+    def name(self) -> Text: 
+        return "action_add_to_cart"
+    
     def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict) -> List[Dict]:
         headers = get_auth_headers(tracker)
-        product_name = next(tracker.get_latest_entity_values("product_name"), tracker.get_slot("product_name"))
-        if not product_name:
-            dispatcher.utter_message(response="utter_ask_product_for_cart")
-            return []
-        print("\n\n\n\n\n\n\tsfdfsdfsdf",product_name)
-        product_id = find_product_id(product_name, headers)
-        print("\n\n\n\n\n\n\tsfdfsdfsdf",product_id)
-        product_id = 4
-
-        if not product_id:
-            dispatcher.utter_message(text=f"Sorry, I couldn't find a product named '{product_name}'.")
-            return []
-
-        api_url = API_BASE_URL + "chatbot/cart/add/"
-        print(f"Adding product ID {product_id} to cart via {api_url}")
-        
-        payload = {"product_id": product_id}
-        try:
-            response = requests.post(api_url, json=payload, headers=headers)
-            response.raise_for_status()
-            dispatcher.utter_message(text=f"Done! I've added {product_name} to your cart.")
-        except requests.exceptions.RequestException as e:
-            print(f"API Error (Add to Cart): {e.response.text if e.response else e}")
-            dispatcher.utter_message(text=f"Sorry, I couldn't add {product_name} to your cart right now.")
-        return []
-
-class ActionAddToWishlist(Action):
-    def name(self) -> Text: return "action_add_to_wishlist"
-    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict) -> List[Dict]:
-        headers = get_auth_headers(tracker)
-        product_name = next(tracker.get_latest_entity_values("product_name"), tracker.get_slot("product_name"))
-        if not product_name:
-            dispatcher.utter_message(text="What product would you like to add to your wishlist?")
+        if not headers:
+            dispatcher.utter_message(text="Please log in to add items to your cart.")
             return []
         
-        product_id = find_product_id(product_name, headers)
-        if not product_id:
-            dispatcher.utter_message(text=f"Sorry, I couldn't find a product named '{product_name}'.")
-            return []
-
-        api_url = API_BASE_URL + "chatbot/wishlist/add/"
-        payload = {"product_id": product_id}
-        try:
-            response = requests.post(api_url, json=payload, headers=headers)
-            response.raise_for_status()
-            dispatcher.utter_message(text=f"Okay, I've added {product_name} to your wishlist.")
-        except requests.exceptions.RequestException as e:
-            print(f"API Error (Add to Wishlist): {e.response.text if e.response else e}")
-            dispatcher.utter_message(text=f"Sorry, I couldn't add {product_name} to your wishlist right now.")
-        return []
-
-class ActionRemoveFromCart(Action):
-    def name(self) -> Text: return "action_remove_from_cart"
-    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict) -> List[Dict]:
-        headers = get_auth_headers(tracker)
-        product_name = next(tracker.get_latest_entity_values("product_name"), None)
+        product_name = next(tracker.get_latest_entity_values("product_name"), tracker.get_slot("product_name"))
+        quantity = next(tracker.get_latest_entity_values("number"), 1)
+        
         if not product_name:
-            dispatcher.utter_message(response="utter_ask_product_for_removal")
+            dispatcher.utter_message(text="Please tell me which product you'd like to add to your cart.")
             return []
-
+        
+        # Find product ID using Elasticsearch
         product_id = find_product_id(product_name, headers)
         if not product_id:
-            dispatcher.utter_message(text=f"I couldn't find '{product_name}' in your cart.")
+            dispatcher.utter_message(text=f"Sorry, I couldn't find a product named '{product_name}'. Try searching for products first to see what's available.")
             return []
 
-        api_url = API_BASE_URL + "chatbot/cart/delete/"
-        payload = {"product_id": product_id}
+        # Add to cart via API
+        api_url = f"{API_BASE_URL}chatbot/cart/add/"
+        payload = {
+            "product_id": product_id,
+            "product_qty": int(quantity) if isinstance(quantity, (int, str)) else 1
+        }
+        
         try:
             response = requests.post(api_url, json=payload, headers=headers)
             response.raise_for_status()
-            dispatcher.utter_message(text=f"Okay, I've removed {product_name} from your cart.")
+            result = response.json()
+            
+            if result.get('status') == 'success':
+                message = result.get('message', f"Added {product_name} to your cart!")
+                cart_qty = result.get('cart_quantity')
+                if cart_qty:
+                    message += f" You now have {cart_qty} items in your cart."
+                dispatcher.utter_message(text=message)
+            else:
+                dispatcher.utter_message(text=result.get('error', 'Failed to add item to cart.'))
+                
         except requests.exceptions.RequestException as e:
-            print(f"API Error (Remove from Cart): {e.response.text if e.response else e}")
-            dispatcher.utter_message(text=f"Sorry, I had trouble removing {product_name} from your cart.")
-        return []
-
-class ActionUpdateCartQuantity(Action):
-    def name(self) -> Text: return "action_update_cart_quantity"
-    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict) -> List[Dict]:
-        headers = get_auth_headers(tracker)
-        product_name = next(tracker.get_latest_entity_values("product_name"), None)
-        quantity = next(tracker.get_latest_entity_values("quantity"), None)
-        if not product_name or not quantity:
-            dispatcher.utter_message(response="utter_ask_product_for_update")
-            return []
-
-        product_id = find_product_id(product_name, headers)
-        if not product_id:
-            dispatcher.utter_message(text=f"I couldn't find '{product_name}' to update.")
-            return []
-
-        api_url = API_BASE_URL + "chatbot/cart/update/"
-        payload = {"product_id": product_id, "quantity": int(quantity)}
-        try:
-            response = requests.post(api_url, json=payload, headers=headers)
-            response.raise_for_status()
-            dispatcher.utter_message(text=f"I've updated the quantity for {product_name} to {quantity}.")
-        except requests.exceptions.RequestException as e:
-            print(f"API Error (Update Cart): {e.response.text if e.response else e}")
-            dispatcher.utter_message(text=f"Sorry, I couldn't update the quantity for {product_name}.")
+            handle_api_error(dispatcher, self.name(), e)
         return []
 
 class ActionViewCart(Action):
-    def name(self) -> Text:
+    def name(self) -> Text: 
         return "action_view_cart"
+    
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict) -> List[Dict]:
+        headers = get_auth_headers(tracker)
+        if not headers:
+            dispatcher.utter_message(text="Please log in to view your cart.")
+            return []
 
-    def run(self, dispatcher, tracker, domain):
-        user_id = tracker.sender_id
-        token = tracker.get_latest_input_channel()  # Or metadata["token"]
-
-        headers = {"Authorization": f"Bearer {token}"}
+        api_url = f"{API_BASE_URL}api/chatbot/cart/summary"
         try:
-            response = requests.get(
-                url = "http://0.0.0.0:8000/api/chatbot/cart/summary/",
-                headers=headers,
-                timeout=10
-            )
-            print("\n\n\n\n\n\n\tsfdfsdfsdf",response)
-            if response.status_code == 200:
-                data = response.json()
-                # Format response
-                message = "Here is your cart:\n"
-                for p in data['products']:
-                    message += f"- {p['name']} x {p['quantity']} (${p['price']})\n"
-                message += f"Total: ${data['total']} (+GST: ${data['gst_total']})"
+            response = requests.get(api_url, headers=headers)
+            response.raise_for_status()
+            cart_data = response.json()
+            
+            if cart_data.get('status') == 'success' and cart_data.get('products'):
+                products = cart_data['products']
+                message = f"🛒 **Your Shopping Cart** ({len(products)} items):\n\n"
+                
+                for item in products:
+                    message += f"• **{item['name']}**\n"
+                    message += f"  📦 Quantity: {item['quantity']}\n"
+                    message += f"  💰 Price: ₹{item['price']} each\n"
+                    if 'total_price' in item:
+                        message += f"  💵 Total: ₹{item['total_price']}\n"
+                    message += "\n"
+                
+                message += f"💳 **Subtotal:** ₹{cart_data['total']}\n"
+                message += f"🏛️ **Total (with GST):** ₹{cart_data['gst_total']}"
+                
                 dispatcher.utter_message(text=message)
             else:
-                dispatcher.utter_message(text="Sorry, I'm having trouble viewing your cart right now.")
-        except Exception as e:
-            print(f"Error in action_view_cart: {e}")
-            dispatcher.utter_message(text="Sorry, I'm having trouble viewing your cart right now.")
+                dispatcher.utter_message(text="🛒 Your shopping cart is empty. Would you like to search for some products?")
+                
+        except requests.exceptions.RequestException as e:
+            handle_api_error(dispatcher, self.name(), e)
         return []
 
+class ActionRemoveFromCart(Action):
+    def name(self) -> Text: 
+        return "action_remove_from_cart"
+    
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict) -> List[Dict]:
+        headers = get_auth_headers(tracker)
+        if not headers:
+            dispatcher.utter_message(text="Please log in to modify your cart.")
+            return []
+        
+        product_name = next(tracker.get_latest_entity_values("product_name"), tracker.get_slot("product_name"))
+        
+        if not product_name:
+            dispatcher.utter_message(text="Please tell me which product you'd like to remove from your cart.")
+            return []
+        
+        # Find product ID using Elasticsearch
+        product_id = find_product_id(product_name, headers)
+        if not product_id:
+            dispatcher.utter_message(text=f"Sorry, I couldn't find a product named '{product_name}' to remove from your cart.")
+            return []
+
+        # Remove from cart via API
+        api_url = f"{API_BASE_URL}chatbot/cart/delete/"
+        payload = {"product_id": product_id}
+        
+        try:
+            response = requests.post(api_url, json=payload, headers=headers)
+            response.raise_for_status()
+            result = response.json()
+            
+            if result.get('status') == 'success':
+                dispatcher.utter_message(text=result.get('message', f"Removed {product_name} from your cart!"))
+            else:
+                dispatcher.utter_message(text=result.get('error', 'Failed to remove item from cart.'))
+                
+        except requests.exceptions.RequestException as e:
+            handle_api_error(dispatcher, self.name(), e)
+        return []
+
+class ActionUpdateCartQuantity(Action):
+    def name(self) -> Text: 
+        return "action_update_cart_quantity"
+    
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict) -> List[Dict]:
+        headers = get_auth_headers(tracker)
+        if not headers:
+            dispatcher.utter_message(text="Please log in to modify your cart.")
+            return []
+        
+        product_name = next(tracker.get_latest_entity_values("product_name"), tracker.get_slot("product_name"))
+        quantity = next(tracker.get_latest_entity_values("number"), None)
+        
+        if not product_name or not quantity:
+            dispatcher.utter_message(text="Please tell me which product and the new quantity you'd like.")
+            return []
+        
+        # Find product ID using Elasticsearch
+        product_id = find_product_id(product_name, headers)
+        if not product_id:
+            dispatcher.utter_message(text=f"Sorry, I couldn't find a product named '{product_name}' in your cart.")
+            return []
+
+        # Update cart via API
+        api_url = f"{API_BASE_URL}chatbot/cart/update/"
+        payload = {
+            "product_id": product_id,
+            "product_qty": int(quantity)
+        }
+        
+        try:
+            response = requests.post(api_url, json=payload, headers=headers)
+            response.raise_for_status()
+            result = response.json()
+            
+            if result.get('status') == 'success':
+                dispatcher.utter_message(text=result.get('message', f"Updated {product_name} quantity to {quantity}!"))
+            else:
+                dispatcher.utter_message(text=result.get('error', 'Failed to update cart.'))
+                
+        except requests.exceptions.RequestException as e:
+            handle_api_error(dispatcher, self.name(), e)
+        return []
+
+class ActionAddToWishlist(Action):
+    def name(self) -> Text: 
+        return "action_add_to_wishlist"
+    
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict) -> List[Dict]:
+        headers = get_auth_headers(tracker)
+        if not headers:
+            dispatcher.utter_message(text="Please log in to add items to your wishlist.")
+            return []
+        
+        product_name = next(tracker.get_latest_entity_values("product_name"), tracker.get_slot("product_name"))
+        
+        if not product_name:
+            dispatcher.utter_message(text="Please tell me which product you'd like to add to your wishlist.")
+            return []
+        
+        # Find product ID using Elasticsearch
+        product_id = find_product_id(product_name, headers)
+        if not product_id:
+            dispatcher.utter_message(text=f"Sorry, I couldn't find a product named '{product_name}'. Try searching for products first.")
+            return []
+
+        # Add to wishlist via API
+        api_url = f"{API_BASE_URL}chatbot/wishlist/add/"
+        payload = {"product_id": product_id}
+        
+        try:
+            response = requests.post(api_url, json=payload, headers=headers)
+            response.raise_for_status()
+            result = response.json()
+            
+            if result.get('status') == 'success':
+                dispatcher.utter_message(text=result.get('message', f"Added {product_name} to your wishlist!"))
+            else:
+                dispatcher.utter_message(text=result.get('error', 'Failed to add item to wishlist.'))
+                
+        except requests.exceptions.RequestException as e:
+            handle_api_error(dispatcher, self.name(), e)
         return []
 
 class ActionViewPastOrders(Action):
-    def name(self) -> Text: return "action_view_past_orders"
+    def name(self) -> Text: 
+        return "action_view_past_orders"
+    
     def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict) -> List[Dict]:
-        headers = get_auth_headers(tracker)
-        # NOTE: You will need to create a '/api/orders/' endpoint for this to work.
-        # This is a placeholder until that endpoint is created.
-        orders_url = API_BASE_URL + "orders/"
-        dispatcher.utter_message(text="Sorry, the ability to view past orders is still under development.")
+        dispatcher.utter_message(text="📋 Order history functionality is coming soon! I can help you with your current cart and wishlist for now.")
         return []
-

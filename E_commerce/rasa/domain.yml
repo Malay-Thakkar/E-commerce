@@ -39,14 +39,14 @@ responses:
     - text: "I am a bot, powered by Rasa and integrated into the PSThakkar E-commerce platform."
 
 actions:
-  - action_add_to_cart
-  - action_view_past_orders
-  - action_trigger_research_agent
   - action_search_product
-  - action_add_to_wishlist
+  - action_add_to_cart
   - action_remove_from_cart
   - action_update_cart_quantity
   - action_view_cart
+  - action_view_past_orders
+  - action_add_to_wishlist
+  - action_trigger_research_agent
   - utter_greet
   - utter_goodbye
   - utter_ask_product_name

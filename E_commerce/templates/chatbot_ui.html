@@ -1,10 +1,17 @@
-<!-- PSAssist Chatbot UI Component -->
 {% load static %}
 
-<!-- Font Awesome CDN for Icons -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 <style>
+    :root {
+        --psassist-primary: #181c24ff;
+        --psassist-user-bg: #2563eb;
+        --psassist-bot-bg: #f3f4f6;
+        --psassist-text-dark: #1f2937;
+        --psassist-text-light: #ffffff;
+        --psassist-font: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
     #psassist-chat-widget {
         position: fixed;
         bottom: 20px;
@@ -12,139 +19,205 @@
         z-index: 1000;
     }
 
-    #psassist-chat-container {
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        transition: all 0.3s ease-in-out;
-        border-radius: 12px;
-        overflow: hidden;
-        font-family: 'Segoe UI', sans-serif;
-    }
-
-    .psassist-message.user {
-        text-align: right;
-    }
-
-    .psassist-message.user .psassist-message-content {
-        background-color: #2563eb;
-        color: white;
-        border-top-right-radius: 0;
-    }
-
-    .psassist-message.bot .psassist-message-content {
-        background-color: #f3f4f6;
-        color: #1f2937;
-        border-top-left-radius: 0;
-    }
-
-    .psassist-message-content {
-        padding: 0.75rem 1rem;
-        border-radius: 18px;
-        display: inline-block;
-        max-width: 80%;
-    }
-
-    #psassist-chat-box {
-        background-color: #fff;
-    }
-
-    /* Custom Scrollbar */
-    #psassist-chat-box::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    #psassist-chat-box::-webkit-scrollbar-thumb {
-        background: rgba(0, 0, 0, 0.1);
-        border-radius: 4px;
-    }
-
     #psassist-toggle-btn {
-        background: #181c24ff;
-        width: 110px;
-        height: 110px;
-        border-radius: 30%;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        background: var(--psassist-primary);
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        color: var(--psassist-text-light);
+        font-size: 1.5rem;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
+        transition: transform 0.2s ease-out;
     }
 
+    #psassist-toggle-btn:hover {
+        transform: scale(1.1);
+    }
+    
+    #psassist-chat-container {
+        width: 370px;
+        height: 70vh;
+        max-height: 600px;
+        margin-bottom: 80px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        border-radius: 15px;
+        font-family: var(--psassist-font);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background-color: #fff;
+        border: 1px solid #e5e7eb;
+        /* Animation for open/close */
+        transform-origin: bottom right;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    }
+    
+    #psassist-chat-container.hidden {
+        transform: scale(0.9);
+        opacity: 0;
+        pointer-events: none;
+    }
 
-    .psassist-logo {
-        height: 32px;
-        width: 32px;
-        margin-right: 10px;
-        border-radius: 50%;
+    /* Header */
+    .psassist-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        background-color: #f9fafb;
     }
 
     .psassist-header-title {
         display: flex;
         align-items: center;
-        font-weight: bold;
-        font-size: 1rem;
-        color: #374151;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: var(--psassist-text-dark);
+    }
+    
+    .psassist-logo {
+        height: 36px;
+        width: 36px;
+        margin-right: 12px;
+        border-radius: 50%;
     }
 
     #psassist-close-btn {
-        font-size: 1.2rem;
-        color: #6b7280;
+        font-size: 1.25rem;
+        color: #9ca3af;
         background: none;
         border: none;
         cursor: pointer;
+        transition: color 0.2s;
+    }
+    #psassist-close-btn:hover { color: var(--psassist-text-dark); }
+
+    /* Messages Area */
+    #psassist-chat-box {
+        flex: 1;
+        padding: 1rem;
+        overflow-y: auto;
+        background-color: #fff;
+        /* Subtle background pattern */
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f0f0f0' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     }
 
-    #psassist-close-btn:hover {
-        color: #111827;
+    /* Custom Scrollbar */
+    #psassist-chat-box::-webkit-scrollbar { width: 6px; }
+    #psassist-chat-box::-webkit-scrollbar-track { background: transparent; }
+    #psassist-chat-box::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 3px;
     }
-    .hidden {
-        display: none;
+    #psassist-chat-box::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+    .psassist-message {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 0.75rem;
     }
+    
+    .psassist-message-content {
+        padding: 0.65rem 1rem;
+        border-radius: 18px;
+        max-width: 85%;
+        line-height: 1.5;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        word-wrap: break-word;
+    }
+    
+    .psassist-message.user { align-items: flex-end; }
+    .psassist-message.user .psassist-message-content {
+        background-color: var(--psassist-user-bg);
+        color: var(--psassist-text-light);
+        border-bottom-right-radius: 4px;
+    }
+
+    .psassist-message.bot { align-items: flex-start; }
+    .psassist-message.bot .psassist-message-content {
+        background-color: var(--psassist-bot-bg);
+        color: var(--psassist-text-dark);
+        border-bottom-left-radius: 4px;
+    }
+
+    /* Input Area */
+    .psassist-input-area {
+        padding: 0.75rem 1rem;
+        border-top: 1px solid #e5e7eb;
+        background-color: #f9fafb;
+    }
+
+    .psassist-input-wrapper {
+        display: flex;
+        align-items: center;
+        background-color: #fff;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    
+    #psassist-chat-input {
+        flex: 1;
+        padding: 0.75rem;
+        border: none;
+        background: transparent;
+        outline: none;
+        font-size: 0.95rem;
+    }
+
+    #psassist-send-btn {
+        padding: 0.75rem 1rem;
+        background: transparent;
+        border: none;
+        font-size: 1.1rem;
+        color: var(--psassist-user-bg);
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    #psassist-send-btn:hover { color: #1e40af; }
+    .hidden { display: none; }
 </style>
 
 <div id="psassist-chat-widget">
-    <!-- Chat Popup -->
-    <div id="psassist-chat-container" class="hidden w-80 sm:w-96 h-[60vh] flex flex-col bg-white border" style="box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); margin-bottom: 105px; margin-right: 25px;">
+    <div id="psassist-chat-container" class="hidden">
         {% csrf_token %}
-        <!-- Header -->
-        <div class="flex items-center justify-between p-3 border-b bg-gray-50">
+        <div class="psassist-header">
             <div class="psassist-header-title">
                 <img src="{% static 'img/chatbot.png' %}" alt="PSAssist Logo" class="psassist-logo">
-                PSAssist
+                <span>PSAssist</span>
             </div>
             <button id="psassist-close-btn" aria-label="Close Chat">
-                <i class="fas fa-times"></i>
+                <i class="fa-solid fa-times"></i>
             </button>
         </div>
-        <!-- Messages -->
-        <div id="psassist-chat-box" class="flex-1 p-4 overflow-y-auto space-y-2">
-            <div class="psassist-message bot">
-                <div class="psassist-message-content">
-                    Hello! I'm PSAssist. How can I help you shop today?
-                </div>
+
+        <div id="psassist-chat-box">
             </div>
-        </div>
-        <!-- Input -->
-        <div class="p-3 border-t bg-gray-50">
-            <div class="flex">
-                <input type="text" id="psassist-chat-input" placeholder="Ask something..." class="flex-1 px-3 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button id="psassist-send-btn" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="background-color: #181c24ff;">
-                    Send
+
+        <div class="psassist-input-area">
+            <div class="psassist-input-wrapper">
+                <input type="text" id="psassist-chat-input" placeholder="Ask something..." autocomplete="off">
+                <button id="psassist-send-btn" aria-label="Send Message">
+                    <i class="fa-solid fa-paper-plane"></i>
                 </button>
             </div>
         </div>
     </div>
-
-    <!-- Toggle Button -->
-     <div style="position: absolute; bottom: 0; right: 0; margin: 20px;">
-        <button id="psassist-toggle-btn">
-            <img src="{% static 'img/chatbot.png' %}" alt="PSAssist Logo"> 
-        </button>
+    <div style="position: absolute; right:0;margin:20px;bottom:15px;">
+    <button id="psassist-toggle-btn" aria-label="Toggle Chat">
+        <img src="{% static 'img/chatbot.png' %}" alt="PSAssist Logo">
+    </button>
     </div>
-
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // --- DOM Elements ---
     const chatContainer = document.getElementById('psassist-chat-container');
     const toggleBtn = document.getElementById('psassist-toggle-btn');
     const closeBtn = document.getElementById('psassist-close-btn');
@@ -152,16 +225,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatInput = document.getElementById('psassist-chat-input');
     const chatBox = document.getElementById('psassist-chat-box');
 
-    const getCsrfToken = () => {
-        const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
-        return tokenInput ? tokenInput.value : '';
-    };
+    // --- State & Config ---
+    const STORAGE_KEY = 'psassistChatHistory'; // Key for sessionStorage
 
-    const toggleChat = () => {
+    // --- Helper Functions ---
+    const getCsrfToken = () => document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+    const toggleChatWindow = () => {
         chatContainer.classList.toggle('hidden');
         toggleBtn.classList.toggle('hidden');
+        if (!chatContainer.classList.contains('hidden')) {
+            chatInput.focus();
+        }
     };
 
+    /**
+     * Saves the entire chat history to sessionStorage.
+     */
+    const saveMessages = () => {
+        const messages = [];
+        chatBox.querySelectorAll('.psassist-message').forEach(msgDiv => {
+            messages.push({
+                text: msgDiv.querySelector('.psassist-message-content').textContent,
+                sender: msgDiv.classList.contains('user') ? 'user' : 'bot'
+            });
+        });
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    };
+
+    /**
+     * Adds a message to the UI and scrolls to the bottom.
+     * @param {string} text - The message content.
+     * @param {string} sender - 'user' or 'bot'.
+     */
     const addMessage = (text, sender) => {
         const msgDiv = document.createElement('div');
         msgDiv.className = `psassist-message ${sender}`;
@@ -172,14 +268,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         msgDiv.appendChild(contentDiv);
         chatBox.appendChild(msgDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to bottom
     };
 
+    /**
+     * Loads messages from sessionStorage and populates the chat window.
+     */
+    const loadMessages = () => {
+        const history = JSON.parse(sessionStorage.getItem(STORAGE_KEY));
+        if (history && Array.isArray(history) && history.length > 0) {
+            history.forEach(msg => addMessage(msg.text, msg.sender));
+        } else {
+            // If no history, add the default welcome message
+            addMessage("Hello! I'm PSAssist. How can I help you shop today?", 'bot');
+            saveMessages(); // Save the initial state
+        }
+    };
+
+    /**
+     * Handles sending a message to the backend API.
+     */
     const sendMessage = async () => {
         const message = chatInput.value.trim();
         if (!message) return;
 
         addMessage(message, 'user');
+        saveMessages(); // Save user message
         chatInput.value = '';
 
         try {
@@ -192,31 +306,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ message: message })
             });
 
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            if (!response.ok) throw new Error(`API Error: ${response.status}`);
 
-            const botData = await response.json();
-            botData.forEach(botReply => {
-                if (botReply.text) {
-                    addMessage(botReply.text, 'bot');
+            const botReplies = await response.json();
+            botReplies.forEach(reply => {
+                if (reply.text) {
+                    addMessage(reply.text, 'bot');
                 }
             });
+            saveMessages(); // Save bot replies
         } catch (error) {
             console.error('Error sending message:', error);
             addMessage('Sorry, something went wrong. Please try again.', 'bot');
+            saveMessages(); // Save error message
         }
     };
-    toggleBtn.addEventListener('click', () => {
-        console.log("Toggle button clicked");
-        toggleChat();
-    });
-    closeBtn.addEventListener('click', () => {
-        console.log("Close button clicked");
-        toggleChat();
-    });
-   
+
+    // --- Event Listeners ---
+    toggleBtn.addEventListener('click', toggleChatWindow);
+    closeBtn.addEventListener('click', toggleChatWindow);
     sendBtn.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent form submission
+            sendMessage();
+        }
     });
+
+    // --- Initial Load ---
+    loadMessages(); // Load chat history when the page loads
 });
 </script>

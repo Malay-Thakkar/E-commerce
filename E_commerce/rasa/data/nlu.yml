@@ -51,7 +51,7 @@ nlu:
 
 - intent: update_cart_quantity
   examples: |
-    - update quantity of [laptops](product_name) to [3](quantity)
+    -   
     - change [Product 12](product_name) to [5](quantity)
     - I need [2](quantity) of the [t-shirts](product_name)
 

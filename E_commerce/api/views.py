@@ -156,3 +156,6 @@ def export_products_csv(request):
         writer.writerow([product.product_id, product.name, product.category.category, product.price, product.stock, product.img if product.img else ''])
     
     return response
+
+
+# Django API View for Elasticsearch Product Search

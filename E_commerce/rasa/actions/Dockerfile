@@ -18,4 +18,3 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Switch back to the default non-root user for better security
 USER 1001
 
-CMD ["python", "-m", "rasa_sdk", "--actions", "actions", "--host", "0.0.0.0"]
