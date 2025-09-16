@@ -226,22 +226,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatBox = document.getElementById('psassist-chat-box');
 
     // --- State & Config ---
-    const STORAGE_KEY = 'psassistChatHistory'; // Key for sessionStorage
-
+    const STORAGE_KEY = 'psassistChatHistory'; 
     // --- Helper Functions ---
     const getCsrfToken = () => document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
 
     const toggleChatWindow = () => {
-        chatContainer.classList.toggle('hidden');
-        toggleBtn.classList.toggle('hidden');
-        if (!chatContainer.classList.contains('hidden')) {
-            chatInput.focus();
-        }
+            chatContainer.classList.toggle('hidden');
+            toggleBtn.classList.toggle('hidden');
+            if (chatContainer.classList.contains('hidden')) {
+                chatContainer.style.display = 'none';
+                toggleBtn.style.display = '';
+            } else {
+                chatContainer.style.display = '';
+                toggleBtn.style.display = 'none';
+                chatInput.focus();
+            }
     };
 
-    /**
-     * Saves the entire chat history to sessionStorage.
-     */
     const saveMessages = () => {
         const messages = [];
         chatBox.querySelectorAll('.psassist-message').forEach(msgDiv => {
@@ -293,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!message) return;
 
         addMessage(message, 'user');
-        saveMessages(); // Save user message
+        saveMessages();
         chatInput.value = '';
 
         try {
@@ -306,7 +307,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ message: message })
             });
 
-            if (!response.ok) throw new Error(`API Error: ${response.status}`);
+            if (!response.ok) {
+                // Handle not logged in (401/403)
+                if (response.status === 401 || response.status === 403) {
+                    addMessage('You need to be logged in to use the chatbot.', 'bot');
+                    saveMessages();
+                    return;
+                }
+                throw new Error(`API Error: ${response.status}`);
+            }
 
             const botReplies = await response.json();
             botReplies.forEach(reply => {
@@ -314,26 +323,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     addMessage(reply.text, 'bot');
                 }
             });
-            saveMessages(); // Save bot replies
+            saveMessages();
         } catch (error) {
             console.error('Error sending message:', error);
             addMessage('Sorry, something went wrong. Please try again.', 'bot');
-            saveMessages(); // Save error message
+            saveMessages();
         }
     };
 
-    // --- Event Listeners ---
     toggleBtn.addEventListener('click', toggleChatWindow);
     closeBtn.addEventListener('click', toggleChatWindow);
     sendBtn.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
-            e.preventDefault(); // Prevent form submission
+            e.preventDefault();
             sendMessage();
         }
     });
 
-    // --- Initial Load ---
-    loadMessages(); // Load chat history when the page loads
+    chatContainer.style.display = 'none';
+    toggleBtn.style.display = '';
+
+    loadMessages();
 });
 </script>

@@ -191,7 +191,7 @@ class ActionViewCart(Action):
             dispatcher.utter_message(text="Please log in to view your cart.")
             return []
 
-        api_url = f"{API_BASE_URL}api/chatbot/cart/summary"
+        api_url = f"{API_BASE_URL}chatbot/cart/summary"
         try:
             response = requests.get(api_url, headers=headers)
             response.raise_for_status()

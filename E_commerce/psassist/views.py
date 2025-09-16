@@ -38,9 +38,7 @@ class ChatbotView(APIView):
         try:
             response = requests.post(rasa_server_url, json=rasa_payload, timeout=100)
             response.raise_for_status()
-            print("\n\n\n\n\n\n\tsfdfsdfsdf",response)
             bot_responses = response.json()
-            print("\n\n\n\n\n\n\tsfdfsdfsdf",bot_responses)
             return Response(bot_responses)
         except requests.exceptions.RequestException as e:
             print(f"Error communicating with Rasa server: {e}")

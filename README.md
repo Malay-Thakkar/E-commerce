@@ -1,50 +1,69 @@
 # E-Commerce Project Setup Guide
 
-## **For Dockerized App Setup**
+## **Dockerized App Setup**
 
-### **1. Install Docker Compose**
+### **1. Install Docker Compose (Recommend)**
+
 #### **Ubuntu/Linux:**
 ```sh
 sudo apt update
 sudo apt install docker-compose -y
 ```
+
 #### **Windows/macOS:**
 Download and install Docker Desktop from [Docker's official website](https://www.docker.com/products/docker-desktop/).
 
-### **2. Build and Start the Docker Containers:**
-   ```sh
-   docker compose up --build -d
-   ```
-   
-### **3. Check Running Containers:**
-   ```sh
-   docker ps
-   ```
-   
-### **4. Apply Migrations:**
-   ```sh
-   docker exec -it ps_thakker_e_commerce python manage.py migrate
-   ```
-   
-### **5. Create a Superuser (Optional for Admin Panel):**
-   ```sh
-   docker exec -it ps_thakker_e_commerce python manage.py createsuperuser
-   ```
-   
-### **6. Check Logs:**
-   ```sh
-   docker logs -f ps_thakker_e_commerce
-   ```
-   
-### **7. Restart Containers:**
-   ```sh
-   docker compose restart
-   ```
-   
-### **8. Stop Containers:**
-   ```sh
-   docker compose down
-   ```
+---
+
+### **2. Clone Repository**
+```sh
+git clone <your_repo_url>
+cd <repo_folder>
+```
+
+---
+
+### **3. Set Rasa Permissions**
+```sh
+sudo chown -R 1001:1001 rasa/
+```
+
+---
+
+### **4. Stop Running Containers (if any)**
+```sh
+docker compose down
+```
+
+---
+
+### **5. Build and Start Containers**
+```sh
+docker compose up --build -d
+```
+
+---
+
+### **6. Run Management Command in Web Container**
+```sh
+docker exec -it <web_container_name> python manage.py update_index
+```
+
+---
+
+### **7. Train Rasa Model**
+```sh
+docker exec -it <rasa_container_name> rasa train
+```
+
+---
+
+### **8. Restart Containers**
+```sh
+docker compose restart
+```
+
+---
 
 ## **For Normal Setup (Without Docker)**
 

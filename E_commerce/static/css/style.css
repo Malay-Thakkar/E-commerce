@@ -35,6 +35,11 @@
     min-height: 100vh;
 }
 
+/* Ensure the body can take up the full screen height */
+html {
+    height: 100%;
+}
+
 *,
 ::after,
 ::before {
@@ -339,12 +344,12 @@ a {
 .modal-content {
     background-color: ivory;
 }
-
+/* Your updated footer styles */
 footer {
-    bottom: 0;
+    /* bottom: 0; */
     padding: 10px;
     width: 100%;
-    position: relative;
+    /* position: relative; */
     background-color: #000000;
     color: white;
     text-align: center;

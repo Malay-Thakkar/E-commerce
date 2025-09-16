@@ -94,3 +94,9 @@ class Cart():
     def cart_gsttotal(self):
         total = self.cart_total()
         return ((total * 18) / 100) + total
+    
+    def delete_all(self):
+        #for session 
+        self.cart.clear()
+        self.session.modified = True
+        self._save()
