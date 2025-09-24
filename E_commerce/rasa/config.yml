@@ -6,6 +6,7 @@ language: en
 pipeline:
 - name: WhitespaceTokenizer
 - name: RegexFeaturizer
+- name: RegexEntityExtractor
 - name: LexicalSyntacticFeaturizer
 - name: CountVectorsFeaturizer
 - name: CountVectorsFeaturizer

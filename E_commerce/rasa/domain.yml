@@ -58,4 +58,5 @@ actions:
   - utter_goodbye
   - utter_ask_product_name
   - utter_iamabot
+  - action_ask_complex_question
 

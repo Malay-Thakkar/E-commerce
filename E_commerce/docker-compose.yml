@@ -12,6 +12,7 @@ services:
     volumes:
       - .:/E-commerce
       - ./staticfiles:/app/staticfiles
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       db:
         condition: service_healthy
@@ -107,8 +108,20 @@ services:
       timeout: 5s
       retries: 5
 
-  # --- NEW CHATBOT SERVICES ---
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.13
+    container_name: ${COMPOSE_PROJECT_NAME}_kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    networks:
+      - default
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
 
+  # --- NEW CHATBOT SERVICES ---
   rasa:
     image: rasa/rasa:3.6.10-full
     container_name: ${COMPOSE_PROJECT_NAME}_rasa
@@ -116,7 +129,6 @@ services:
       - "5005:5005"
     volumes:
       - ./rasa:/app/
-    # CORRECTED COMMAND: Added the '--model' flag
     command: run --enable-api --cors "*" --model /app/models
     networks:
       - default
@@ -136,7 +148,6 @@ services:
       - default
     depends_on:
       - web
-      - ollama
 
   ollama:
     image: ollama/ollama
@@ -147,6 +158,8 @@ services:
       - ollama_data:/root/.ollama
     networks:
       - default
+    dns:
+      - 8.8.8.8
 
 volumes:
   postgres_data:
@@ -155,5 +168,3 @@ volumes:
 networks:
   default:
 
-    # docker-compose exec ollama ollama pull phi3:mini
-    # docker-compose exec rasa rasa train

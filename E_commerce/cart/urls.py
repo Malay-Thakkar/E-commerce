@@ -1,5 +1,5 @@
 from django.urls import path
-from cart.views import cart_add,cart_delete,cart_summary,cart_update,wishlist_summary, wishlist_add, wishlist_delete,CartAddAPIView, WishlistAddAPIView, CartSummaryAPIView, CartDeleteAPIView, CartUpdateAPIView, ProductSearchAPIView
+from cart.views import cart_add,cart_delete,cart_summary,cart_update,wishlist_summary, wishlist_add, wishlist_delete,CartAddAPIView, WishlistAddAPIView, CartSummaryAPIView, CartDeleteAPIView, CartUpdateAPIView, ProductSearchAPIView, ComplexSearchAPIView
 
 urlpatterns = [
     path('cart/',cart_summary,name="cart_summary"),
@@ -16,4 +16,5 @@ urlpatterns = [
     path('api/chatbot/cart/delete/', CartDeleteAPIView.as_view(), name='api_chatbot_cart_delete'),
     path('api/chatbot/cart/update/', CartUpdateAPIView.as_view(), name='api_chatbot_cart_update'),
     path('api/product/search/', ProductSearchAPIView.as_view(), name='api_product_search'),
+    path('api/complex/search', ComplexSearchAPIView.as_view(), name='api_complex_search'),
 ]

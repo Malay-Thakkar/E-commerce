@@ -20,18 +20,26 @@ nlu:
   examples: |
     - who are you?
 
+- lookup: product_name
+  examples: |
+    - data/lookups/product_names.txt
+
+- regex: product_with_number
+  examples: |
+    - Product \d+
+
 - intent: search_product
   examples: |
-    - search [product_name](product_name)
-    - search for [product_name](product_name)
-    - search for product [product_name](product_name)
-    - do you have any [product_name](product_name)?
-    - I'm looking for a [product_name](product_name)
-    - find [product_name](product_name)
-    - find me a [product_name](product_name)
-    - show me the [product_name](product_name)
-    - I'm looking for a [product_name](product_name)
-    - can you find [product_name](product_name)
+    - I want to buy a [Kitkat](product_name)
+    - Do you have any [Munch](product_name) bars in stock?
+    - Search for [Perk](product_name)
+    - Can you find [Inderjoy](product_name) for me?
+    - I'm trying to find [Product 15](product_name)
+    - Where can I find [Product 99](product_name)?
+    - Show me the details for [Product 7](product_name)
+    - find me the item called [Test](product_name)
+    - I am looking for [Test](product_name)
+    - search for product [Product 42](product_name)
 
 - intent: add_to_cart
   examples: |
@@ -79,5 +87,12 @@ nlu:
 - intent: ask_complex_question
   examples: |
     - which is better, the [red shirt](product_name) or the [blue one](product_name_secondary)?
+    - compare the [Samsung Galaxy](product_name) and the [iPhone 15](product_name_secondary)
+    - what is the difference between a [MacBook Pro](product_name) and a [MacBook Air](product_name_secondary)?
     - find me a [laptop](product_name) with good reviews for gaming
-    - compare the [product_name](product_name) and the [Dell XPS](product_name_secondary)
+    - show me a [camera](product_name) that is good for travel photography
+    - I need a [monitor](product_name) with a high refresh rate
+    - Can you compare the [Sony headphones](product_name) with the [Bose ones](product_name_secondary)?
+    - Tell me which is more powerful, the [Dell XPS](product_name) or the [HP Spectre](product_name_secondary)?
+    - I'm looking for a [graphics card](product_name) that can handle 4K video editing
+    - What are the main features of the [latest drone](product_name)?

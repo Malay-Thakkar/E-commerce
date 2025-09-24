@@ -1,6 +1,9 @@
 import requests
 from typing import Any, Text, Dict, List, TypedDict
-
+import subprocess
+import time
+import threading
+from typing import Any, Text, Dict, List
 # Rasa Imports
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
@@ -351,3 +354,60 @@ class ActionViewPastOrders(Action):
     def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict) -> List[Dict]:
         dispatcher.utter_message(text="📋 Order history functionality is coming soon! I can help you with your current cart and wishlist for now.")
         return []
+import aiohttp
+from typing import Any, Text, Dict, List
+# ... your other imports
+class ActionComplexQuestion(Action):
+    def name(self) -> Text:
+        return "action_ask_complex_question"
+
+    async def run(self, dispatcher: CollectingDispatcher,
+                  tracker: Tracker,
+                  domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        user_question = tracker.latest_message.get('text')
+        conversation_id = tracker.sender_id
+        headers = get_auth_headers(tracker)
+        if not headers:
+            dispatcher.utter_message(text="Please log in for complex message.")
+            return []
+
+        # Immediately tell the user you're working on it
+        dispatcher.utter_message(text="🤖 Understood. I need to consult my advanced knowledge base for that. This may take a moment, I'll get back to you with the answer.")
+
+        # Prepare the data and headers to send to your Django server
+        api_url = f"{API_BASE_URL}complex/search"
+        payload = {
+            "question": user_question,
+            "conversation_id": conversation_id
+        }
+        
+        try:
+            # Make the async request to your web server and don't wait for the full result
+            async with aiohttp.ClientSession() as session:
+                async with session.post(api_url, json=payload, headers=headers) as response:
+                    # Check if the job was accepted
+                    if response.status != 202: # 202 Accepted
+                        dispatcher.utter_message(text="Sorry, my advanced knowledge base seems to be unavailable right now.")
+                        print(f"Error: Django server responded with status {response.status}")
+        
+        except aiohttp.ClientError as e:
+            print(f"Error calling Django server: {e}")
+            dispatcher.utter_message(text="I'm having trouble connecting to my internal services.")
+            
+        return []
+
+# ACTION 2: Delivers the final result when the web server calls back
+class ActionDeliverLLMResponse(Action):
+    def name(self) -> Text:
+        return "action_deliver_llm_response"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        response = tracker.get_slot("llm_response")
+        if response:
+            dispatcher.utter_message(text=response)
+        
+        return [SlotSet("llm_response", None)]

@@ -19,7 +19,7 @@ rules:
 - rule: Handle complex questions
   steps:
   - intent: ask_complex_question
-  - action: action_trigger_research_agent
+  - action: action_ask_complex_question
 
 - rule: Handle add to cart
   steps:

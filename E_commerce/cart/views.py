@@ -477,3 +477,121 @@ def searchproduct(request):
                 "html": render(request, "search_products.html", context).content.decode("utf-8")
             })
     return JsonResponse({"html": ""})
+
+import threading
+import time
+import requests
+import docker
+from docker.errors import NotFound
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+
+# --- Configuration ---
+# Find this by running `docker ps` after starting with the profile
+OLLAMA_CONTAINER_NAME = "ps-thakkar_ollama" 
+MODEL_TO_CHECK = "phi3:mini" # The model you want to use
+RASA_SERVER_URL = "http://rasa:5005" # Hostname of the Rasa server inside Docker
+
+# --- Helper Functions using Docker SDK ---
+
+def get_ollama_container():
+    """Finds and returns the ollama container object."""
+    try:
+        client = docker.from_env()
+        return client.containers.get(OLLAMA_CONTAINER_NAME)
+    except NotFound:
+        print(f"Container '{OLLAMA_CONTAINER_NAME}' not found.")
+        return None
+    except Exception as e:
+        print(f"Error connecting to Docker: {e}")
+        return None
+
+def is_ollama_running():
+    """Checks if the ollama service is running using the SDK."""
+    container = get_ollama_container()
+    return container and container.status == 'running'
+
+def start_ollama():
+    """Starts the ollama container and waits for the specific model to be ready."""
+    container = get_ollama_container()
+    if not container:
+        raise RuntimeError(f"Ollama container '{OLLAMA_CONTAINER_NAME}' was not found.")
+
+    if container.status != 'running':
+        print("Ollama is not running. Starting container...")
+        container.start()
+    
+    print(f"Waiting for Ollama model '{MODEL_TO_CHECK}' to become available...")
+    max_retries = 15  # Try for 75 seconds
+    for i in range(max_retries):
+        try:
+            response = requests.get("http://ollama:11434/api/tags", timeout=5)
+            if response.status_code == 200:
+                models = response.json().get("models", [])
+                for model in models:
+                    if MODEL_TO_CHECK in model.get("name"):
+                        print(f"✅ Ollama model '{MODEL_TO_CHECK}' is loaded and ready.")
+                        return
+        except requests.exceptions.RequestException:
+            pass
+        
+        print(f"Attempt {i+1}/{max_retries}: Ollama not ready yet, waiting 5 seconds...")
+        time.sleep(5)
+    
+    raise RuntimeError(f"Ollama service or model '{MODEL_TO_CHECK}' did not become available in time.")
+
+def stop_ollama():
+    """Stops the ollama container using the Docker SDK."""
+    container = get_ollama_container()
+    if container and container.status == 'running':
+        print("Ollama task complete. Stopping container.")
+        container.stop()
+
+# --- Background Worker & API View ---
+
+def process_llm_request_task(conversation_id: str, question: str):
+    """Runs in a background thread to handle the entire Ollama lifecycle."""
+    print(f"Starting background task for conversation_id: {conversation_id}")
+    rasa_callback_url = f"{RASA_SERVER_URL}/conversations/{conversation_id}/trigger_intent"
+    
+    try:
+        start_ollama()
+        
+        ollama_url = "http://ollama:11434/api/generate"
+        payload = {"model": MODEL_TO_CHECK, "prompt": question, "stream": False}
+        
+        response = requests.post(ollama_url, json=payload, timeout=90)
+        response.raise_for_status()
+        data = response.json()
+        llm_answer = data.get("response", "Sorry, I couldn't process that.")
+
+        requests.post(rasa_callback_url, json={
+            "name": "EXTERNAL_llm_response_ready",
+            "entities": {"llm_response": llm_answer}
+        })
+    except Exception as e:
+        print(f"Error in background LLM task for {conversation_id}: {e}")
+        requests.post(rasa_callback_url, json={
+            "name": "EXTERNAL_llm_response_ready",
+            "entities": {"llm_response": "Sorry, there was an error with the advanced knowledge base."}
+        })
+    finally:
+        stop_ollama()
+
+class ComplexSearchAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        """Receives a request from Rasa and starts the background task."""
+        question = request.data.get("question")
+        conversation_id = request.data.get("conversation_id")
+
+        if not question or not conversation_id:
+            return Response({"error": "question and conversation_id are required."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        thread = threading.Thread(target=process_llm_request_task, args=(conversation_id, question))
+        thread.start()
+
+        return Response({"status": "processing_started"}, status=status.HTTP_202_ACCEPTED)
